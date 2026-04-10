@@ -93,10 +93,10 @@ const roles = [
 
 // ── Stat data ──
 const stats = [
-  { value: "12,000+", label: "Students enrolled" },
-  { value: "400+", label: "Biotech companies" },
-  { value: "850+", label: "Courses & resources" },
-  { value: "120+", label: "Events monthly" },
+  { value: "2", label: "Students enrolled" },
+  { value: "0", label: "Biotech companies" },
+  { value: "0", label: "Courses & resources" },
+  { value: "0", label: "Events monthly" },
 ];
 
 // ── Reusable fade wrapper ──
