@@ -300,7 +300,7 @@ export default function Home() {
                 border: "1px solid #E8E6F8",
               }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} />
-                <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a2e" }}>12,000+ students active</span>
+                <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a2e" }}>2 students active</span>
               </div>
             </div>
           </Fade>
