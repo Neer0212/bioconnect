@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           {["Dashboard", "Learning", "Jobs", "Research", "Events"].map((item) => (
-            <a key={item} href={item === "Dashboard" ? "/dashboard" : "#"} style={{
+            <a key={item} href={item === "Dashboard" ? "/dashboard" : item === "Learning" ? "/learning" : "#"} style={{
               fontSize: "14px", color: item === "Dashboard" ? "#5B4FD8" : "#4a4a6a",
               padding: "6px 12px", borderRadius: "8px",
               fontWeight: item === "Dashboard" ? 600 : 400,

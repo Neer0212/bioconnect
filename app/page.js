@@ -225,8 +225,8 @@ export default function Home() {
 
         {/* CTA */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <a className="nav-link" href="#">Login</a>
-          <button className="btn-primary" style={{ padding: "9px 20px" }}>Get Started</button>
+          <a className="nav-link" href="/login">Login</a>
+          <a className="btn-primary" href="/signup" style={{ padding: "9px 20px" }}>Get Started</a>
         </div>
       </nav>
 
@@ -267,12 +267,12 @@ export default function Home() {
 
             <Fade delay={240}>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <button className="btn-primary" style={{ fontSize: "15px", padding: "13px 28px" }}>
+                <a className="btn-primary" href="/signup" style={{ fontSize: "15px", padding: "13px 28px", display: "inline-block", textAlign: "center" }}>
                   Join BioConnect
-                </button>
-                <button className="btn-outline" style={{ fontSize: "15px", padding: "13px 28px" }}>
+                </a>
+                <a className="btn-outline" href="#features" style={{ fontSize: "15px", padding: "13px 28px", display: "inline-block", textAlign: "center" }}>
                   Learn More
-                </button>
+                </a>
               </div>
             </Fade>
           </div>
