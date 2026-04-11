@@ -118,24 +118,25 @@ function Fade({ children, delay = 0, className = "" }) {
 }
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // For mobile nav toggle (not fully implemented in this snippet, but state is set up for it)
 
   return (
-    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}>
+    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}> // Main container with base styles
 
       {/* Google Font */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap'); // Importing DM Sans and DM Serif Display for typography
+      
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } // Resetting default margins and paddings, and setting box-sizing to border-box for easier layout control
         html { scroll-behavior: smooth; }
         body { background: #F5F4FB; }
-        ::selection { background: #C8C4F6; }
-        a { text-decoration: none; color: inherit; }
+        ::selection { background: #C8C4F6; } // Custom selection color for better aesthetics
+        a { text-decoration: none; color: inherit; } // Ensuring links inherit color and have no default underline
 
         .nav-link {
           font-size: 14px; color: #4a4a6a; padding: 6px 12px;
           border-radius: 8px; transition: background 0.2s, color 0.2s;
-          font-weight: 400;
+          font-weight: 400;s
         }
         .nav-link:hover { background: #EEEDFE; color: #5B4FD8; }
 
