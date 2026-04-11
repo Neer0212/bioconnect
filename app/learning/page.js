@@ -16,18 +16,18 @@ const SUBJECTS = [
 export default function LearningPage() {
   const supabase = createClient();
   const router = useRouter();
-  const [profile, setProfile] = useState(null);
-  const [openSubject, setOpenSubject] = useState(null);
-  const [notes, setNotes] = useState({});
-  const [uploading, setUploading] = useState(false);
+  const [profile, setProfile] = useState(null); // State to hold user profile data
+  const [openSubject, setOpenSubject] = useState(null); // State to track which subject accordion is open
+  const [notes, setNotes] = useState({}); // State to hold notes for each subject, structured as { subjectId: [file1, file2, ...] }
+  const [uploading, setUploading] = useState(false); // State to track if a file upload is in progress
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(data);
-      loadAllNotes();
+      const { data: { user } } = await supabase.auth.getUser(); // Get current user from SPB auth
+      if (!user) { router.push("/login"); return; } // If no user, redirect to login
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single(); // Fetch user profile from "profiles" table where id matches user.id
+      setProfile(data); // Save profile data to state
+      loadAllNotes(); // Load notes for all subjects after we have the user profile
     }
     load();
   }, []);

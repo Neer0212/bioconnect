@@ -15,25 +15,25 @@ export default function LoginPage() {
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
-  }
+  } // Simple form state management: when an input changes, update the corresponding field in the form state
 
   async function handleSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); // Stops page refresh
     setLoading(true);
     setError("");
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
-    });
+    }); // Attempt to sign in with SPB using the email and password from the form. If there's an error, it will be stored in signInError
 
     if (signInError) {
       setError(signInError.message);
       setLoading(false);
-      return;
-    }
+      return; // If there's an error during sign-in, show the error message and stop loading
+    } 
 
-    router.push("/dashboard");
+    router.push("/dashboard"); // If sign-in is successful, redirect to the dashboard page
   }
 
   return (

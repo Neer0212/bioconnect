@@ -1,39 +1,47 @@
-"use client";
+//This file does 3 main things:
+//1. Checks if user is logged in
+//2. Fetches user data from database
+//3. Shows dashboard UI
+
+"use client"; //This tells Next.js: “This page runs on the browser (not server)”
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client"; //Connects to SPB. This is backend connection
+import { useRouter } from "next/navigation"; // Next.js hook for navigating programmatically (like redirecting after logout)
 
-export default function DashboardPage() {
-  const supabase = createClient();
-  const router = useRouter();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function DashboardPage() // Main dashboard component 
+{
+  const supabase = createClient(); // Connection to SPB
+  const router = useRouter(); // Hook to navigate programmatically (like redirecting after logout)
+  const [profile, setProfile] = useState(null); // State to hold user profile data
+  const [loading, setLoading] = useState(true); // State to track if we're still loading user data
 
-  useEffect(() => {
+  useEffect(() => // On component mount, check if user is logged in and fetch profile data 
+  {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(data);
-      setLoading(false);
+      const { data: { user } } = await supabase.auth.getUser(); // Get current user from SPB auth
+      if (!user) { router.push("/login"); return; } // If no user, redirect to login
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single(); // Fetch user profile from "profiles" table where id matches user.id
+      setProfile(data); // Save profile data to state
+      setLoading(false); // Set loading to false since we have the data now
     }
     load();
   }, []);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
+  async function handleLogout() // Function to log the user out
+  {
+    await supabase.auth.signOut(); // Log the user out from SPB
+    router.push("/login"); // After logging out, redirect to login page
   }
 
   if (loading) return (
     <main style={styles.page}><style>{globalCSS}</style>
       <p style={{ textAlign: "center", padding: "100px 20px", color: "#666" }}>Loading...</p>
     </main>
-  );
+  ); // While loading user data, show a simple loading message
 
   const firstName = profile?.full_name?.split(" ")[0] || "User";
   const role = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "Student";
-  const isEducator = profile?.role === "educator" || profile?.role === "researcher";
+  const isEducator = profile?.role === "educator" || profile?.role === "researcher"; // Simple check to determine if user is an educator (could be expanded based on actual roles in your app)
 
   return (
     <main style={styles.page}>

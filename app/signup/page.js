@@ -11,18 +11,19 @@ export default function SignupPage() {
     password: "",
     role: "student",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false); // State to track if the sign-up process is in progress
+  const [error, setError] = useState(""); // State to hold any error messages that occur during sign-up
+  const [success, setSuccess] = useState(false); // State to indicate if sign-up was successful (used to show a confirmation message instead of the form)
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  async function handleSubmit(e) // Runs when user clicks “Sign Up”
+   {
+    e.preventDefault(); // Stop the form from refreshing the page when submitted
+    setLoading(true); // Set loading to true to disable the button and show a loading state
+    setError(""); // Clear any previous error messages
 
     const { error: signUpError } = await supabase.auth.signUp({
       email: form.email,
@@ -33,20 +34,22 @@ export default function SignupPage() {
           phone: form.phone,
           role: form.role,
         },
-      },
+      }, // account is created in SPB auth system, and the additional user data is stored
     });
 
-    if (signUpError) {
+    if (signUpError) // If there's an error during sign-up, show the error message and stop loading
+   {
       setError(signUpError.message);
       setLoading(false);
       return;
-    }
+    } 
 
-    setSuccess(true);
-    setLoading(false);
+    setSuccess(true); // If sign-up is successful, set success to true to show the confirmation message
+    setLoading(false); // Stop loading since the process is complete
   }
 
-  if (success) {
+  if (success) // If sign-up was successful, show a confirmation message instead of the form
+  {
     return (
       <main style={styles.page}>
         <style>{globalCSS}</style>
