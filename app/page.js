@@ -218,7 +218,7 @@ export default function Home() {
         </div>
 
         {/* Nav links */}
-        <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <a className="nav-link" href="#features">Features</a>
           <a className="nav-link" href="#roles">For you</a>
           <a className="nav-link" href="#stats">About</a>
