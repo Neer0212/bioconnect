@@ -121,7 +121,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false); // For mobile nav toggle (not fully implemented in this snippet, but state is set up for it)
 
   return (
-    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}> // Main container with base styles
+    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}> 
 
       {/* Google Font */}
       <style>{`
