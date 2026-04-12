@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 // ── Tiny animation hook: fade+slide up on scroll ──
 function useFadeIn() {
@@ -91,14 +92,6 @@ const roles = [
   },
 ];
 
-// ── Stat data ──
-const stats = [
-  { value: "2", label: "Students enrolled" },
-  { value: "0", label: "Biotech companies" },
-  { value: "0", label: "Courses & resources" },
-  { value: "0", label: "Events monthly" },
-];
-
 // ── Reusable fade wrapper ──
 function Fade({ children, delay = 0, className = "" }) {
   const ref = useFadeIn();
@@ -118,25 +111,48 @@ function Fade({ children, delay = 0, className = "" }) {
 }
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false); // For mobile nav toggle (not fully implemented in this snippet, but state is set up for it)
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [stats, setStats] = useState([
+    { value: "0", label: "Users joined" },
+    { value: "0", label: "Research papers" },
+    { value: "0", label: "Events listed" },
+    { value: "0", label: "Subjects available" },
+  ]);
+
+  useEffect(() => {
+    async function loadStats() {
+      const supabase = createClient();
+      const [users, papers, events] = await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("research_papers").select("id", { count: "exact", head: true }),
+        supabase.from("events").select("id", { count: "exact", head: true }),
+      ]);
+      setStats([
+        { value: (users.count || 0).toLocaleString(), label: "Users joined" },
+        { value: (papers.count || 0).toLocaleString(), label: "Research papers" },
+        { value: (events.count || 0).toLocaleString(), label: "Events listed" },
+        { value: "6", label: "Subjects available" },
+      ]);
+    }
+    loadStats();
+  }, []);
 
   return (
-    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}> 
+    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}>
 
       {/* Google Font */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap'); // Importing DM Sans and DM Serif Display for typography
-      
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } // Resetting default margins and paddings, and setting box-sizing to border-box for easier layout control
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         body { background: #F5F4FB; }
-        ::selection { background: #C8C4F6; } // Custom selection color for better aesthetics
-        a { text-decoration: none; color: inherit; } // Ensuring links inherit color and have no default underline
+        ::selection { background: #C8C4F6; }
+        a { text-decoration: none; color: inherit; }
 
         .nav-link {
           font-size: 14px; color: #4a4a6a; padding: 6px 12px;
           border-radius: 8px; transition: background 0.2s, color 0.2s;
-          font-weight: 400;s
+          font-weight: 400;
         }
         .nav-link:hover { background: #EEEDFE; color: #5B4FD8; }
 
@@ -144,7 +160,7 @@ export default function Home() {
           background: #5B4FD8; color: #fff; border: none;
           padding: 11px 24px; border-radius: 10px; font-size: 14px;
           font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s;
-          font-family: inherit;
+          font-family: inherit; text-decoration: none; display: inline-block; text-align: center;
         }
         .btn-primary:hover { background: #4A3FC0; transform: translateY(-1px); }
 
@@ -153,7 +169,7 @@ export default function Home() {
           border: 1.5px solid #C8C4F6; padding: 11px 24px;
           border-radius: 10px; font-size: 14px; font-weight: 500;
           cursor: pointer; transition: background 0.2s, border-color 0.2s;
-          font-family: inherit;
+          font-family: inherit; text-decoration: none; display: inline-block; text-align: center;
         }
         .btn-outline:hover { background: #EEEDFE; border-color: #5B4FD8; }
 
@@ -203,15 +219,15 @@ export default function Home() {
         height: "64px",
       }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
           <img src="/logo.jpg" alt="BioConnect" style={{ width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }} />
           <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "20px", color: "#1a1a2e", letterSpacing: "-0.3px" }}>
             BioConnect
           </span>
-        </div>
+        </a>
 
         {/* Nav links */}
-        <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+        <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <a className="nav-link" href="#features">Features</a>
           <a className="nav-link" href="#roles">For you</a>
           <a className="nav-link" href="#stats">About</a>
@@ -261,10 +277,10 @@ export default function Home() {
 
             <Fade delay={240}>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <a className="btn-primary" href="/signup" style={{ fontSize: "15px", padding: "13px 28px", display: "inline-block", textAlign: "center" }}>
+                <a className="btn-primary" href="/signup" style={{ fontSize: "15px", padding: "13px 28px" }}>
                   Join BioConnect
                 </a>
-                <a className="btn-outline" href="#features" style={{ fontSize: "15px", padding: "13px 28px", display: "inline-block", textAlign: "center" }}>
+                <a className="btn-outline" href="#features" style={{ fontSize: "15px", padding: "13px 28px" }}>
                   Learn More
                 </a>
               </div>
@@ -279,13 +295,11 @@ export default function Home() {
               border: "1px solid #E8E6F8",
               position: "relative",
             }}>
-              {/* Placeholder image — replace src with your actual lab photo */}
               <img
                 src="https://images.unsplash.com/photo-1614935151651-0bea6508db6b?w=800&q=80"
                 alt="Biotech researchers in a lab"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
-              {/* Subtle overlay badge */}
               <div style={{
                 position: "absolute", bottom: "16px", left: "16px",
                 background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
@@ -294,7 +308,7 @@ export default function Home() {
                 border: "1px solid #E8E6F8",
               }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} />
-                <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a2e" }}>2 students active</span>
+                <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a2e" }}>{stats[0].value} users active</span>
               </div>
             </div>
           </Fade>
@@ -382,37 +396,31 @@ export default function Home() {
               Ready to Transform Your Biotech Journey?
             </h2>
             <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.75)", marginBottom: "32px" }}>
-              Join thousands of biotech students, educators, and researchers across India
+              Join biotech students, educators, and researchers across India
             </p>
             <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-              <button style={{
+              <a href="/signup" style={{
                 background: "#fff", color: "#5B4FD8", border: "none",
                 padding: "13px 30px", borderRadius: "10px",
                 fontSize: "15px", fontWeight: "600", cursor: "pointer",
-                fontFamily: "inherit", transition: "transform 0.15s",
-              }}
-                onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
-                onMouseOut={e => e.target.style.transform = "translateY(0)"}
-              >
+                fontFamily: "inherit", textDecoration: "none",
+              }}>
                 Get Started Free
-              </button>
-              <button style={{
+              </a>
+              <a href="#features" style={{
                 background: "transparent", color: "#fff",
                 border: "1.5px solid rgba(255,255,255,0.45)",
                 padding: "13px 30px", borderRadius: "10px",
                 fontSize: "15px", fontWeight: "500", cursor: "pointer",
-                fontFamily: "inherit", transition: "background 0.2s",
-              }}
-                onMouseOver={e => e.target.style.background = "rgba(255,255,255,0.1)"}
-                onMouseOut={e => e.target.style.background = "transparent"}
-              >
-                Talk to us
-              </button>
+                fontFamily: "inherit", textDecoration: "none",
+              }}>
+                Learn More
+              </a>
             </div>
           </div>
         </Fade>
 
-        {/* Stats grid */}
+        {/* Stats grid — real-time from Supabase */}
         <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
           {stats.map((s, i) => (
             <Fade key={s.label} delay={i * 60}>
@@ -437,25 +445,25 @@ export default function Home() {
               <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "18px", color: "#fff" }}>BioConnect</span>
             </div>
             <p style={{ fontSize: "14px", color: "#6a6a8a", lineHeight: "1.7", maxWidth: "260px" }}>
-              Connecting India's biotech community — students, educators, researchers, and industry.
+              Connecting India&apos;s biotech community — students, educators, researchers, and industry.
             </p>
           </div>
 
           {/* Links */}
           {[
-            { heading: "Platform", links: ["Learning Hub", "Jobs & Internships", "Research Papers", "Events Calendar"] },
-            { heading: "Company", links: ["About Us", "Blog", "Careers", "Contact"] },
-            { heading: "Support", links: ["Help Center", "Privacy Policy", "Terms of Service", "Cookie Policy"] },
+            { heading: "Platform", links: [{ name: "Learning Hub", href: "/learning" }, { name: "Research Papers", href: "/research" }, { name: "Events", href: "/event" }] },
+            { heading: "Account", links: [{ name: "Sign Up", href: "/signup" }, { name: "Login", href: "/login" }, { name: "Dashboard", href: "/dashboard" }] },
+            { heading: "Support", links: [{ name: "Help Center", href: "#" }, { name: "Privacy Policy", href: "#" }, { name: "Terms of Service", href: "#" }] },
           ].map((col) => (
             <div key={col.heading}>
               <h4 style={{ fontSize: "13px", fontWeight: "600", color: "#fff", marginBottom: "16px", letterSpacing: "0.5px" }}>{col.heading}</h4>
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" style={{ fontSize: "14px", color: "#6a6a8a", transition: "color 0.2s" }}
+                  <li key={l.name}>
+                    <a href={l.href} style={{ fontSize: "14px", color: "#6a6a8a", transition: "color 0.2s" }}
                       onMouseOver={e => e.target.style.color = "#C8C4F6"}
                       onMouseOut={e => e.target.style.color = "#6a6a8a"}
-                    >{l}</a>
+                    >{l.name}</a>
                   </li>
                 ))}
               </ul>
@@ -464,7 +472,7 @@ export default function Home() {
         </div>
 
         <div style={{ borderTop: "1px solid #2a2a4a", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <p style={{ fontSize: "13px", color: "#4a4a6a" }}>© 2026 BioConnect. Made with care for India's biotech community.</p>
+          <p style={{ fontSize: "13px", color: "#4a4a6a" }}>© 2026 BioConnect. Made with care for India&apos;s biotech community.</p>
           <p style={{ fontSize: "13px", color: "#4a4a6a" }}>Built in India 🇮🇳</p>
         </div>
       </footer>
