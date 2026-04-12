@@ -85,7 +85,7 @@ export default function LearningPage() {
         </a>
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/events" }].map((item) => (
+          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/eventss" }].map((item) => (
             <a key={item.label} href={item.href} style={{
               fontSize: "14px", color: item.label === "Learning" ? "#5B4FD8" : "#4a4a6a",
               padding: "6px 14px", borderRadius: "8px", fontWeight: item.label === "Learning" ? 600 : 400,

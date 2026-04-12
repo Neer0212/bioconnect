@@ -79,7 +79,7 @@ export default function ProfilePage() {
         </a>
 
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/events" }].map((item) => (
+          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/eventss" }].map((item) => (
             <a key={item.label} href={item.href} style={{
               fontSize: "14px", color: "#4a4a6a", padding: "6px 14px", borderRadius: "8px",
               fontWeight: 400, background: "transparent", textDecoration: "none",

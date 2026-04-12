@@ -54,7 +54,7 @@ export default function DashboardPage() // Main dashboard component
         </a>
 
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/events" }].map((item) => (
+          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/eventss" }].map((item) => (
             <a key={item.label} href={item.href} style={{
               fontSize: "14px", color: item.label === "Dashboard" ? "#5B4FD8" : "#4a4a6a",
               padding: "6px 14px", borderRadius: "8px", fontWeight: item.label === "Dashboard" ? 600 : 400,
