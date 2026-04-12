@@ -47,7 +47,7 @@ export default function LearningPage() {
       return;
     }
     setUploading(true);
-    const fileName = `${Date.now()}_${file.name}`;
+    const fileName = `${profile.id.slice(0, 8)}_${Date.now()}_${file.name}`;
     const { error } = await supabase.storage
       .from("course-materials")
       .upload(`${subjectId}/${fileName}`, file);
@@ -94,129 +94,124 @@ export default function LearningPage() {
           ))}
         </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{ width: 34, height: 34, background: "#EEEDFE", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: "14px", color: "#5B4FD8" }}>
-          {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: 34, height: 34, background: "#EEEDFE", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: "14px", color: "#5B4FD8" }}>
+            {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+          </div>
+          <span style={{ fontSize: "14px", color: "#1a1a2e", fontWeight: 500 }}>{profile?.full_name?.split(" ")[0]}</span>
         </div>
-        <span style={{ fontSize: "14px", color: "#1a1a2e", fontWeight: 500 }}>{profile?.full_name?.split(" ")[0]}</span>
-      </div>
-    </nav>
+      </nav>
 
-      {/* Header */ }
-  <section style={{ textAlign: "center", padding: "48px 20px 24px" }}>
-    <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "36px", color: "#1a1a2e", marginBottom: "8px" }}>
-      Learning Hub
-    </h1>
-    <p style={{ fontSize: "16px", color: "#666" }}>Access study materials and notes organized by subject</p>
-  </section>
+      {/* Header */}
+      <section style={{ textAlign: "center", padding: "48px 20px 24px" }}>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "36px", color: "#1a1a2e", marginBottom: "8px" }}>
+          Learning Hub
+        </h1>
+        <p style={{ fontSize: "16px", color: "#666" }}>Access study materials and notes organized by subject</p>
+      </section>
 
-  {/* Subjects list */ }
-  <section style={{ padding: "0 max(24px, calc((100vw - 800px)/2)) 60px" }}>
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      {SUBJECTS.map((sub) => {
-        const isOpen = openSubject === sub.id;
-        const subNotes = notes[sub.id] || [];
-        const pdfFiles = subNotes.filter(f => f.name && f.name.endsWith(".pdf"));
+      {/* Subjects list */}
+      <section style={{ padding: "0 max(24px, calc((100vw - 800px)/2)) 60px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {SUBJECTS.map((sub) => {
+            const isOpen = openSubject === sub.id;
+            const subNotes = notes[sub.id] || [];
+            const pdfFiles = subNotes.filter(f => f.name && f.name.endsWith(".pdf"));
 
-        return (
-          <div key={sub.id} style={{ background: "#fff", border: "1px solid #E8E6F8", borderRadius: "16px", overflow: "hidden" }}>
-            {/* Subject header */}
-            <button
-              onClick={() => setOpenSubject(isOpen ? null : sub.id)}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "20px 24px", background: "none", border: "none", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                <div style={{ width: 44, height: 44, background: sub.color + "15", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px" }}>
-                  {sub.icon}
-                </div>
-                <div style={{ textAlign: "left" }}>
-                  <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#1a1a2e", marginBottom: "2px" }}>{sub.name}</h3>
-                  <span style={{ fontSize: "13px", color: "#888" }}>{pdfFiles.length} {pdfFiles.length === 1 ? "note" : "notes"}</span>
-                </div>
-              </div>
-              <span style={{ fontSize: "20px", color: "#999", transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0)" }}>▾</span>
-            </button>
+            return (
+              <div key={sub.id} style={{ background: "#fff", border: "1px solid #E8E6F8", borderRadius: "16px", overflow: "hidden" }}>
+                {/* Subject header */}
+                <button
+                  onClick={() => setOpenSubject(isOpen ? null : sub.id)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "20px 24px", background: "none", border: "none", cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ width: 44, height: 44, background: sub.color + "15", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px" }}>
+                      {sub.icon}
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#1a1a2e", marginBottom: "2px" }}>{sub.name}</h3>
+                      <span style={{ fontSize: "13px", color: "#888" }}>{pdfFiles.length} {pdfFiles.length === 1 ? "note" : "notes"}</span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: "20px", color: "#999", transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0)" }}>▾</span>
+                </button>
 
-            {/* Expanded content */}
-            {isOpen && (
-              <div style={{ padding: "0 24px 24px", borderTop: "1px solid #E8E6F8" }}>
+                {/* Expanded content */}
+                {isOpen && (
+                  <div style={{ padding: "0 24px 24px", borderTop: "1px solid #E8E6F8" }}>
 
-                {/* PDF list */}
-                {pdfFiles.length === 0 ? (
-                  <p style={{ fontSize: "14px", color: "#999", padding: "20px 0 12px" }}>No notes uploaded yet for this subject.</p>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "16px 0 12px" }}>
-                    {pdfFiles.map((file) => (
-                      <div key={file.name} style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "12px 16px", background: "#F9F8FF", borderRadius: "10px",
-                      }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <span style={{ fontSize: "18px" }}>📄</span>
-                          <span style={{ fontSize: "14px", color: "#1a1a2e", fontWeight: 500 }}>
-                            {file.name.replace(/^\d+_/, "")}
-                          </span>
-                        </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <a
-                            href={getPublicUrl(sub.id, file.name)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              fontSize: "13px", color: "#5B4FD8", fontWeight: 500,
-                              padding: "6px 14px", borderRadius: "8px", background: "#EEEDFE",
-                              textDecoration: "none",
-                            }}
-                          >
-                            View PDF
-                          </a>
-                          {isEducator && (
-                            <button
-                              onClick={() => handleDelete(sub.id, file.name)}
-                              style={{
-                                fontSize: "13px", color: "#DC2626", fontWeight: 500,
-                                padding: "6px 14px", borderRadius: "8px", background: "#FEF2F2",
-                                border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                              }}
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
+                    {/* PDF list */}
+                    {pdfFiles.length === 0 ? (
+                      <p style={{ fontSize: "14px", color: "#999", padding: "20px 0 12px" }}>No notes uploaded yet for this subject.</p>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "16px 0 12px" }}>
+                        {pdfFiles.map((file) => (
+                          <div key={file.name} style={{
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            padding: "12px 16px", background: "#F9F8FF", borderRadius: "10px",
+                          }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <span style={{ fontSize: "18px" }}>📄</span>
+                              <span style={{ fontSize: "14px", color: "#1a1a2e", fontWeight: 500 }}>
+                                {file.name.replace(/^\d+_/, "")}
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              <a
+                                href={getPublicUrl(sub.id, file.name)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  fontSize: "13px", color: "#5B4FD8", fontWeight: 500,
+                                  padding: "6px 14px", borderRadius: "8px", background: "#EEEDFE",
+                                  textDecoration: "none",
+                                }}
+                              >
+                                View PDF
+                              </a>
+                              {isEducator && file.name.startsWith(profile?.id?.slice(0, 8)) && (
+                                <button onClick={() => handleDelete(sub.id, file.name)} style={{
+                                  fontSize: "13px", color: "#DC2626", fontWeight: 500,
+                                  padding: "6px 14px", borderRadius: "8px", background: "#FEF2F2",
+                                  border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                                }}>Delete</button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+
+                    {/* Upload button (educators/researchers only) */}
+                    {isEducator && (
+                      <label style={{
+                        display: "inline-flex", alignItems: "center", gap: "8px",
+                        padding: "10px 18px", background: "#5B4FD8", color: "#fff",
+                        borderRadius: "10px", fontSize: "14px", fontWeight: 500,
+                        cursor: uploading ? "wait" : "pointer", opacity: uploading ? 0.7 : 1,
+                      }}>
+                        {uploading ? "Uploading..." : "Upload PDF"}
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          hidden
+                          disabled={uploading}
+                          onChange={(e) => handleUpload(sub.id, e.target.files?.[0])}
+                        />
+                      </label>
+                    )}
                   </div>
                 )}
-
-                {/* Upload button (educators/researchers only) */}
-                {isEducator && (
-                  <label style={{
-                    display: "inline-flex", alignItems: "center", gap: "8px",
-                    padding: "10px 18px", background: "#5B4FD8", color: "#fff",
-                    borderRadius: "10px", fontSize: "14px", fontWeight: 500,
-                    cursor: uploading ? "wait" : "pointer", opacity: uploading ? 0.7 : 1,
-                  }}>
-                    {uploading ? "Uploading..." : "Upload PDF"}
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      hidden
-                      disabled={uploading}
-                      onChange={(e) => handleUpload(sub.id, e.target.files?.[0])}
-                    />
-                  </label>
-                )}
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </section>
+            );
+          })}
+        </div>
+      </section>
     </main >
   );
 }
