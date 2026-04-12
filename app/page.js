@@ -433,11 +433,7 @@ export default function Home() {
           {/* Brand */}
           <div style={{ flex: "1.2" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
-              <div style={{ width: 30, height: 30, background: "#5B4FD8", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-              </div>
+              <img src="/logo.jpg" alt="BioConnect" style={{ width: 30, height: 30, borderRadius: "8px", objectFit: "cover" }} />
               <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "18px", color: "#fff" }}>BioConnect</span>
             </div>
             <p style={{ fontSize: "14px", color: "#6a6a8a", lineHeight: "1.7", maxWidth: "260px" }}>
