@@ -75,7 +75,7 @@ export default function ResearchPage() {
           <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "20px", color: "#1a1a2e" }}>BioConnect</span>
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }].map((item) => (
+          {[{ label: "Dashboard", href: "/dashboard" }, { label: "Learning", href: "/learning" }, { label: "Research", href: "/research" }, { label: "Events", href: "/events" }].map((item) => (
             <a key={item.label} href={item.href} style={{
               fontSize: "14px", color: item.label === "Research" ? "#5B4FD8" : "#4a4a6a",
               padding: "6px 14px", borderRadius: "8px", fontWeight: item.label === "Research" ? 600 : 400,
