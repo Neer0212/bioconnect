@@ -16,6 +16,9 @@ export const metadata = {
   title: "BioConnect — India's Biotech Academic Platform",
   description: "Connect with biotech students, educators, and researchers. Access learning resources, research papers, and events in one platform.",
   keywords: "biotech, biotechnology, students, India, research papers, learning, education, bioconnect",
+  verification: {
+    google: "Y3o-21u1yXCA2Z1Le9k_aVWaaTebhOt_XrCIYww4-vo",
+  },
 };
 
 export default function RootLayout({ children }) {
