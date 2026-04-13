@@ -206,7 +206,7 @@ export default function ResearchPage() {
                         background: "#EEEDFE", borderRadius: "8px", textDecoration: "none", textAlign: "center",
                       }}>View Paper</a>
                     )}
-                    {isEducator && paper.uploaded_by === profile?.id && (
+                    {(profile?.is_admin || (isEducator && paper.uploaded_by === profile?.id)) && (
                       <button onClick={() => handleDelete(paper.id)} style={{
                         fontSize: "13px", color: "#DC2626", fontWeight: 500, padding: "8px 16px",
                         background: "#FEF2F2", borderRadius: "8px", border: "none", cursor: "pointer",
