@@ -158,7 +158,7 @@ export default function LearningPage() {
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                               <span style={{ fontSize: "18px" }}>📄</span>
                               <span style={{ fontSize: "14px", color: "#1a1a2e", fontWeight: 500 }}>
-                                {file.name.replace(/^\d+_/, "")}
+                                {file.name.substring(file.name.indexOf("_") + 1)}
                               </span>
                             </div>
                             <div style={{ display: "flex", gap: "8px" }}>
