@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "BioConnect",
-  description: "A platform for connecting biotechnology people",
+  title: "BioConnect — India's Biotech Academic Platform",
+  description: "Connect with biotech students, educators, and researchers. Access learning resources, research papers, and events in one platform.",
+  keywords: "biotech, biotechnology, students, India, research papers, learning, education, bioconnect",
 };
 
 export default function RootLayout({ children }) {
