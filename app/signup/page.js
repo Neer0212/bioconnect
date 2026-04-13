@@ -20,7 +20,7 @@ export default function SignupPage() {
   }
 
   async function handleSubmit(e) // Runs when user clicks “Sign Up”
-   {
+  {
     e.preventDefault(); // Stop the form from refreshing the page when submitted
     setLoading(true); // Set loading to true to disable the button and show a loading state
     setError(""); // Clear any previous error messages
@@ -38,11 +38,11 @@ export default function SignupPage() {
     });
 
     if (signUpError) // If there's an error during sign-up, show the error message and stop loading
-   {
+    {
       setError(signUpError.message);
       setLoading(false);
       return;
-    } 
+    }
 
     setSuccess(true); // If sign-up is successful, set success to true to show the confirmation message
     setLoading(false); // Stop loading since the process is complete
@@ -56,7 +56,7 @@ export default function SignupPage() {
         <div style={styles.card}>
           <div style={{ textAlign: "center" }}>
             <div style={{ width: 56, height: 56, background: "#E1F5EE", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <h1 style={styles.title}>Check your email</h1>
             <p style={styles.subtitle}>We sent a verification link to <strong>{form.email}</strong>. Click it to activate your account.</p>
@@ -73,10 +73,10 @@ export default function SignupPage() {
 
       <div style={styles.card}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginBottom: "8px" }}>
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginBottom: "8px", textDecoration: "none" }}>
           <img src="/logo.jpg" alt="BioConnect" style={{ width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }} />
           <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "20px", color: "#1a1a2e" }}>BioConnect</span>
-        </div>
+        </a>
 
         <h1 style={styles.title}>Create your account</h1>
         <p style={styles.subtitle}>Join India's biotech community</p>
