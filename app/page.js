@@ -2,349 +2,231 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-// ── Tiny animation hook: fade+slide up on scroll ──
+/* ── Scroll-triggered fade ── */
 function useFadeIn() {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { el.style.opacity = "1"; el.style.transform = "translateY(0)"; } },
-      { threshold: 0.12 }
+      ([e]) => { if (e.isIntersecting) { el.classList.add("visible"); } },
+      { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
   return ref;
 }
-
-// ── Feature card data ──
-const features = [
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
-      </svg>
-    ),
-    title: "Learning Hub",
-    desc: "Access courses, resources, and educational content tailored for biotech professionals.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-      </svg>
-    ),
-    title: "Jobs & Internships",
-    desc: "Discover opportunities specifically in biotechnology and life sciences.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-      </svg>
-    ),
-    title: "Research Papers",
-    desc: "Explore the latest publications and stay current with cutting-edge research.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-    ),
-    title: "Events Calendar",
-    desc: "Stay updated on conferences, webinars, and networking events.",
-  },
-  {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-    title: "Role-Based Profiles",
-    desc: "Customized experiences for students, educators, researchers, and industry.",
-  },
-];
-
-// ── Role card data ──
-const roles = [
-  {
-    label: "Students",
-    color: "#5B4FD8",
-    bg: "#EEEDFE",
-    desc: "Access learning resources, find internships, connect with mentors, and build your professional foundation.",
-    points: ["Career guidance", "Internship matching", "Skill development", "Peer community"],
-  },
-  {
-    label: "Educators",
-    color: "#0F6E56",
-    bg: "#E1F5EE",
-    desc: "Share knowledge, develop courses, connect with students, and collaborate with fellow educators.",
-    points: ["Course creation tools", "Student engagement", "Resource sharing", "Professional network"],
-  },
-  {
-    label: "Researchers",
-    color: "#854F0B",
-    bg: "#FAEEDA",
-    desc: "Collaborate on projects, publish findings, network with peers, and advance your research.",
-    points: ["Project collaboration", "Research sharing", "Grant opportunities", "Conference connections"],
-  },
-];
-
-// ── Reusable fade wrapper ──
-function Fade({ children, delay = 0, className = "" }) {
+function Fade({ children, delay = 0, className = "", dir = "up" }) {
   const ref = useFadeIn();
+  const transforms = { up: "translateY(40px)", left: "translateX(-40px)", right: "translateX(40px)" };
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: 0,
-        transform: "translateY(24px)",
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
-      }}
-    >
+    <div ref={ref} className={`fade-in ${className}`} style={{ "--delay": `${delay}ms`, "--from": transforms[dir] || transforms.up }}>
       {children}
     </div>
   );
 }
 
+/* ── Animated counter ── */
+function Counter({ target, suffix = "" }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const started = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !started.current) {
+        started.current = true;
+        const num = parseInt(target) || 0;
+        const duration = 1500;
+        const step = Math.max(1, Math.floor(num / (duration / 16)));
+        let current = 0;
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= num) { current = num; clearInterval(timer); }
+          setCount(current);
+        }, 16);
+      }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [target]);
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+}
+
+/* ── Typing effect ── */
+function TypeWriter({ words, speed = 100, pause = 2000 }) {
+  const [text, setText] = useState("");
+  const [wordIdx, setWordIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  useEffect(() => {
+    const word = words[wordIdx];
+    const timeout = setTimeout(() => {
+      if (!deleting) {
+        setText(word.substring(0, charIdx + 1));
+        if (charIdx + 1 === word.length) {
+          setTimeout(() => setDeleting(true), pause);
+        } else {
+          setCharIdx(charIdx + 1);
+        }
+      } else {
+        setText(word.substring(0, charIdx));
+        if (charIdx === 0) {
+          setDeleting(false);
+          setWordIdx((wordIdx + 1) % words.length);
+        } else {
+          setCharIdx(charIdx - 1);
+        }
+      }
+    }, deleting ? speed / 2 : speed);
+    return () => clearTimeout(timeout);
+  }, [charIdx, deleting, wordIdx, words, speed, pause]);
+  return <span>{text}<span className="cursor">|</span></span>;
+}
+
+/* ── Data ── */
+const features = [
+  { icon: "🧬", title: "Learning Hub", desc: "Subject-wise PDF notes and study materials uploaded by educators.", size: "large", color: "#0D9488" },
+  { icon: "📄", title: "Research Papers", desc: "Browse and share scientific publications.", size: "small", color: "#F59E0B" },
+  { icon: "📅", title: "Events", desc: "Conferences, webinars, and workshops.", size: "small", color: "#8B5CF6" },
+  { icon: "👤", title: "Role-Based Profiles", desc: "Tailored for students, educators, researchers.", size: "small", color: "#EC4899" },
+  { icon: "🔬", title: "Academic Ecosystem", desc: "One platform connecting India's entire biotech community.", size: "large", color: "#3B82F6" },
+];
+
+const roles = [
+  { label: "Students", color: "#0D9488", bg: "rgba(13,148,136,0.1)", border: "rgba(13,148,136,0.25)", desc: "Access learning resources, find study materials, and build your academic foundation.", points: ["Subject-wise notes", "Research access", "Event discovery", "Peer community"] },
+  { label: "Educators", color: "#F59E0B", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.25)", desc: "Upload content, share knowledge, and connect with students across universities.", points: ["Upload study materials", "Publish research", "Host events", "Track engagement"] },
+  { label: "Researchers", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.25)", desc: "Share findings, collaborate on projects, and stay updated with the latest publications.", points: ["Share papers", "Find collaborators", "Conference updates", "Grant opportunities"] },
+];
+
+const steps = [
+  { num: "01", title: "Create your account", desc: "Sign up in 30 seconds. Choose your role — student, educator, or researcher." },
+  { num: "02", title: "Explore the platform", desc: "Browse study materials, research papers, and upcoming events." },
+  { num: "03", title: "Start contributing", desc: "Upload notes, share research, or register for events." },
+];
+
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [stats, setStats] = useState([
-    { value: "0", label: "Users joined" },
-    { value: "0", label: "Research papers" },
-    { value: "0", label: "Events listed" },
-    { value: "0", label: "Subjects available" },
-  ]);
+  const [stats, setStats] = useState({ users: 0, papers: 0, events: 0, subjects: 6 });
 
   useEffect(() => {
     async function loadStats() {
       const supabase = createClient();
-      const [users, papers, events] = await Promise.all([
+      const [u, p, e] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("research_papers").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true }),
       ]);
-      setStats([
-        { value: (users.count || 0).toLocaleString(), label: "Users joined" },
-        { value: (papers.count || 0).toLocaleString(), label: "Research papers" },
-        { value: (events.count || 0).toLocaleString(), label: "Events listed" },
-        { value: "6", label: "Subjects available" },
-      ]);
+      setStats({ users: u.count || 0, papers: p.count || 0, events: e.count || 0, subjects: 6 });
     }
     loadStats();
   }, []);
 
   return (
-    <main style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: "#F5F4FB", minHeight: "100vh", color: "#1a1a2e" }}>
-
-      {/* Google Font */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { background: #F5F4FB; }
-        ::selection { background: #C8C4F6; }
-        a { text-decoration: none; color: inherit; }
-
-        .nav-link {
-          font-size: 14px; color: #4a4a6a; padding: 6px 12px;
-          border-radius: 8px; transition: background 0.2s, color 0.2s;
-          font-weight: 400;
-        }
-        .nav-link:hover { background: #EEEDFE; color: #5B4FD8; }
-
-        .btn-primary {
-          background: #5B4FD8; color: #fff; border: none;
-          padding: 11px 24px; border-radius: 10px; font-size: 14px;
-          font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s;
-          font-family: inherit; text-decoration: none; display: inline-block; text-align: center;
-        }
-        .btn-primary:hover { background: #4A3FC0; transform: translateY(-1px); }
-
-        .btn-outline {
-          background: transparent; color: #5B4FD8;
-          border: 1.5px solid #C8C4F6; padding: 11px 24px;
-          border-radius: 10px; font-size: 14px; font-weight: 500;
-          cursor: pointer; transition: background 0.2s, border-color 0.2s;
-          font-family: inherit; text-decoration: none; display: inline-block; text-align: center;
-        }
-        .btn-outline:hover { background: #EEEDFE; border-color: #5B4FD8; }
-
-        .feature-card {
-          background: #fff; border: 1px solid #E8E6F8;
-          border-radius: 16px; padding: 28px 24px;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(91,79,216,0.10); }
-
-        .role-card {
-          background: #fff; border: 1px solid #E8E6F8;
-          border-radius: 16px; padding: 32px 28px;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .role-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(91,79,216,0.08); }
-
-        .stat-card {
-          background: rgba(255,255,255,0.15);
-          border: 1px solid rgba(255,255,255,0.25);
-          border-radius: 14px; padding: 24px 20px; text-align: center;
-        }
-
-        @media (max-width: 768px) {
-          .hero-grid { flex-direction: column !important; }
-          .hero-img { width: 100% !important; margin-top: 32px; }
-          .features-grid { grid-template-columns: 1fr 1fr !important; }
-          .roles-grid { grid-template-columns: 1fr !important; }
-          .stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .footer-grid { flex-direction: column !important; gap: 32px !important; }
-          .nav-links { display: none; }
-          .hero-title { font-size: 36px !important; }
-          .nav-cta .btn-primary { padding: 8px 14px !important; font-size: 12px !important; }
-          .nav-cta .nav-link { font-size: 12px !important; padding: 4px 8px !important; }
-          .nav-cta { gap: 4px !important; }
-          nav img { width: 28px !important; height: 28px !important; }
-          nav span { font-size: 16px !important; }
-
-        }
-        @media (max-width: 480px) {
-          .features-grid { grid-template-columns: 1fr !important; }
-          .stats-grid { grid-template-columns: 1fr 1fr !important; }
-        }
-      `}</style>
+    <main>
+      <style>{CSS}</style>
 
       {/* ── NAVBAR ── */}
-      <nav style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(245,244,251,0.85)", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #E8E6F8",
-        padding: "0 max(24px, calc((100vw - 1160px)/2))",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: "64px",
-      }}>
-        {/* Logo */}
-        <a href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <img src="/logo.jpg" alt="BioConnect" style={{ width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }} />
-          <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "20px", color: "#1a1a2e", letterSpacing: "-0.3px" }}>
-            BioConnect
-          </span>
+      <nav className="nav">
+        <a href="/" className="logo">
+          <img src="/logo.jpg" alt="BioConnect" style={{ width: 34, height: 34, borderRadius: "10px", objectFit: "cover" }} />
+          <span>BioConnect</span>
         </a>
-
-        {/* Nav links */}
-        <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <a className="nav-link" href="#features">Features</a>
-          <a className="nav-link" href="#roles">For you</a>
-          <a className="nav-link" href="#stats">About</a>
+        <div className="nav-links">
+          <a href="#features">Features</a>
+          <a href="#roles">For you</a>
+          <a href="#how">How it works</a>
         </div>
-
-        {/* CTA */}
-        <div className="nav-cta" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <a className="nav-link" href="/login">Login</a>
-          <a className="btn-primary" href="/signup" style={{ padding: "9px 20px" }}>Get Started</a>
+        <div className="nav-cta">
+          <a href="/login" className="nav-login">Login</a>
+          <a href="/signup" className="nav-btn">Get Started</a>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section style={{ padding: "80px max(24px, calc((100vw - 1160px)/2)) 80px" }}>
-        <div className="hero-grid" style={{ display: "flex", alignItems: "center", gap: "60px" }}>
-
-          {/* Left */}
-          <div style={{ flex: "1", minWidth: 0 }}>
+      {/* ── HERO (Dark) ── */}
+      <section className="hero">
+        <div className="hero-bg"></div>
+        <div className="hero-grid">
+          <div className="hero-left">
             <Fade delay={0}>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: "7px",
-                background: "#EEEDFE", border: "1px solid #C8C4F6",
-                borderRadius: "100px", padding: "6px 14px",
-                fontSize: "13px", color: "#5B4FD8", fontWeight: "500",
-                marginBottom: "24px",
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B4FD8" strokeWidth="2" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                The Future of Biotech Collaboration
+              <div className="hero-badge">
+                <span className="badge-dot"></span>
+                India's Biotech Academic Platform
               </div>
             </Fade>
-
-            <Fade delay={80}>
-              <h1 className="hero-title" style={{
-                fontFamily: "'DM Serif Display', serif",
-                fontSize: "52px", lineHeight: "1.1", letterSpacing: "-1px",
-                color: "#1a1a2e", marginBottom: "20px",
-              }}>
-                Learn.<br />Connect.<br />Innovate.
+            <Fade delay={100}>
+              <h1 className="hero-title">
+                <TypeWriter words={["Learn.", "Connect.", "Innovate.", "Discover.", "Collaborate."]} speed={120} pause={1800} />
               </h1>
-            </Fade>
-
-            <Fade delay={160}>
-              <p style={{ fontSize: "17px", color: "#5a5a7a", lineHeight: "1.7", marginBottom: "36px", maxWidth: "460px" }}>
-                The unified platform connecting biotech students, educators, researchers, and industry professionals. Accelerate innovation through collaboration, learning, and professional growth.
+              <p className="hero-subtitle">
+                The unified platform where biotech students, educators, and researchers come together to learn, share, and grow.
               </p>
             </Fade>
-
-            <Fade delay={240}>
-              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <a className="btn-primary" href="/signup" style={{ fontSize: "15px", padding: "13px 28px" }}>
-                  Join BioConnect
-                </a>
-                <a className="btn-outline" href="#features" style={{ fontSize: "15px", padding: "13px 28px" }}>
-                  Learn More
-                </a>
+            <Fade delay={200}>
+              <div className="hero-btns">
+                <a href="/signup" className="btn-primary">Join BioConnect — it's free</a>
+                <a href="#features" className="btn-ghost">See features ↓</a>
+              </div>
+            </Fade>
+            <Fade delay={300}>
+              <div className="hero-stats">
+                <div className="hero-stat"><strong><Counter target={stats.users} suffix="+" /></strong><span>Users</span></div>
+                <div className="hero-stat-divider"></div>
+                <div className="hero-stat"><strong><Counter target={stats.papers} suffix="+" /></strong><span>Papers</span></div>
+                <div className="hero-stat-divider"></div>
+                <div className="hero-stat"><strong><Counter target={stats.subjects} /></strong><span>Subjects</span></div>
               </div>
             </Fade>
           </div>
-
-          {/* Right — hero image */}
-          <Fade delay={300} className="hero-img" style={{ flex: "1", minWidth: 0 }}>
-            <div style={{
-              borderRadius: "20px", overflow: "hidden",
-              background: "#ddd", aspectRatio: "4/3",
-              border: "1px solid #E8E6F8",
-              position: "relative",
-            }}>
-              <img
-                src="https://images.unsplash.com/photo-1614935151651-0bea6508db6b?w=800&q=80"
-                alt="Biotech researchers in a lab"
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-              />
-              <div style={{
-                position: "absolute", bottom: "16px", left: "16px",
-                background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)",
-                borderRadius: "12px", padding: "10px 16px",
-                display: "flex", alignItems: "center", gap: "10px",
-                border: "1px solid #E8E6F8",
-              }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} />
-                <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a2e" }}>{stats[0].value} users active</span>
+          <Fade delay={250} dir="right" className="hero-right">
+            <div className="hero-visual">
+              <div className="hero-glow"></div>
+              <div className="hero-card hc1">
+                <span className="hc-icon">🧬</span>
+                <div><strong>Molecular Biology</strong><span>12 notes uploaded</span></div>
+              </div>
+              <div className="hero-card hc2">
+                <span className="hc-icon">📄</span>
+                <div><strong>New Research Paper</strong><span>CRISPR-Cas9 Variants</span></div>
+              </div>
+              <div className="hero-card hc3">
+                <span className="hc-icon">📅</span>
+                <div><strong>Upcoming Event</strong><span>Biotech Conference 2026</span></div>
               </div>
             </div>
           </Fade>
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <section id="features" style={{ padding: "80px max(24px, calc((100vw - 1160px)/2))", background: "#fff" }}>
-        <Fade>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "38px", color: "#1a1a2e", letterSpacing: "-0.5px", marginBottom: "12px" }}>
-              Everything You Need in One Platform
-            </h2>
-            <p style={{ fontSize: "16px", color: "#5a5a7a" }}>Comprehensive tools designed specifically for the biotech community</p>
-          </div>
-        </Fade>
-
-        <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+      {/* ── FEATURES (Bento Grid) ── */}
+      <section id="features" className="section-light">
+        <Fade><h2 className="section-title">Everything you need, in one place</h2></Fade>
+        <Fade delay={50}><p className="section-sub">Built specifically for India's biotech academic community</p></Fade>
+        <div className="bento">
           {features.map((f, i) => (
-            <Fade key={f.title} delay={i * 70}>
-              <div className="feature-card">
-                <div style={{
-                  width: 44, height: 44, background: "#EEEDFE", borderRadius: "12px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#5B4FD8", marginBottom: "16px",
-                }}>
-                  {f.icon}
-                </div>
-                <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#1a1a2e", marginBottom: "8px" }}>{f.title}</h3>
-                <p style={{ fontSize: "14px", color: "#5a5a7a", lineHeight: "1.6" }}>{f.desc}</p>
+            <Fade key={f.title} delay={i * 80}>
+              <div className={`bento-card ${f.size === "large" ? "bento-large" : ""}`} style={{ "--accent": f.color }}>
+                <span className="bento-icon">{f.icon}</span>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            </Fade>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" className="section-dark">
+        <Fade><h2 className="section-title light">How it works</h2></Fade>
+        <Fade delay={50}><p className="section-sub light">Get started in 3 simple steps</p></Fade>
+        <div className="steps">
+          {steps.map((s, i) => (
+            <Fade key={s.num} delay={i * 100}>
+              <div className="step-card">
+                <span className="step-num">{s.num}</span>
+                <h3>{s.title}</h3>
+                <p>{s.desc}</p>
               </div>
             </Fade>
           ))}
@@ -352,34 +234,18 @@ export default function Home() {
       </section>
 
       {/* ── ROLES ── */}
-      <section id="roles" style={{ padding: "80px max(24px, calc((100vw - 1160px)/2))", background: "#F5F4FB" }}>
-        <Fade>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "38px", color: "#1a1a2e", letterSpacing: "-0.5px", marginBottom: "12px" }}>
-              Built for Every Role in Biotech
-            </h2>
-            <p style={{ fontSize: "16px", color: "#5a5a7a" }}>Tailored experiences that meet you where you are</p>
-          </div>
-        </Fade>
-
-        <div className="roles-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+      <section id="roles" className="section-light">
+        <Fade><h2 className="section-title">Built for every role in biotech</h2></Fade>
+        <Fade delay={50}><p className="section-sub">Tailored experiences that meet you where you are</p></Fade>
+        <div className="roles-grid">
           {roles.map((r, i) => (
-            <Fade key={r.label} delay={i * 80}>
-              <div className="role-card">
-                <div style={{
-                  display: "inline-flex", alignItems: "center",
-                  background: r.bg, borderRadius: "100px",
-                  padding: "5px 14px", marginBottom: "20px",
-                }}>
-                  <span style={{ fontSize: "13px", fontWeight: "600", color: r.color }}>{r.label}</span>
-                </div>
-                <p style={{ fontSize: "14px", color: "#5a5a7a", lineHeight: "1.65", marginBottom: "20px" }}>{r.desc}</p>
-                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <Fade key={r.label} delay={i * 100}>
+              <div className="role-card" style={{ "--rc": r.color, "--rcbg": r.bg, "--rcbr": r.border }}>
+                <span className="role-badge">{r.label}</span>
+                <p className="role-desc">{r.desc}</p>
+                <ul className="role-points">
                   {r.points.map((p) => (
-                    <li key={p} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "#3a3a5a" }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: r.color, flexShrink: 0 }} />
-                      {p}
-                    </li>
+                    <li key={p}><span className="role-dot"></span>{p}</li>
                   ))}
                 </ul>
               </div>
@@ -388,101 +254,249 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── STATS / CTA BANNER ── */}
-      <section id="stats" style={{
-        background: "linear-gradient(135deg, #5B4FD8 0%, #7B6FE8 100%)",
-        padding: "80px max(24px, calc((100vw - 1160px)/2))",
-      }}>
+      {/* ── CTA BANNER ── */}
+      <section className="cta-section">
         <Fade>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <h2 style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "38px", color: "#fff", letterSpacing: "-0.5px", marginBottom: "12px",
-            }}>
-              Ready to Transform Your Biotech Journey?
-            </h2>
-            <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.75)", marginBottom: "32px" }}>
-              Join biotech students, educators, and researchers across India
-            </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="/signup" style={{
-                background: "#fff", color: "#5B4FD8", border: "none",
-                padding: "13px 30px", borderRadius: "10px",
-                fontSize: "15px", fontWeight: "600", cursor: "pointer",
-                fontFamily: "inherit", textDecoration: "none",
-              }}>
-                Get Started Free
-              </a>
-              <a href="#features" style={{
-                background: "transparent", color: "#fff",
-                border: "1.5px solid rgba(255,255,255,0.45)",
-                padding: "13px 30px", borderRadius: "10px",
-                fontSize: "15px", fontWeight: "500", cursor: "pointer",
-                fontFamily: "inherit", textDecoration: "none",
-              }}>
-                Learn More
-              </a>
-            </div>
+          <h2>Ready to transform your biotech journey?</h2>
+          <p>Join students, educators, and researchers across India</p>
+          <div className="cta-btns">
+            <a href="/signup" className="btn-primary">Get Started Free</a>
+            <a href="/login" className="btn-ghost-light">Already have an account?</a>
           </div>
         </Fade>
-
-        {/* Stats grid — real-time from Supabase */}
-        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-          {stats.map((s, i) => (
-            <Fade key={s.label} delay={i * 60}>
-              <div className="stat-card">
-                <div style={{ fontSize: "30px", fontWeight: "700", color: "#fff", fontFamily: "'DM Serif Display', serif", marginBottom: "6px" }}>
-                  {s.value}
-                </div>
-                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.7)" }}>{s.label}</div>
-              </div>
-            </Fade>
-          ))}
-        </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: "#12102A", padding: "56px max(24px, calc((100vw - 1160px)/2)) 32px" }}>
-        <div className="footer-grid" style={{ display: "flex", gap: "60px", marginBottom: "48px" }}>
-          {/* Brand */}
-          <div style={{ flex: "1.2" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
-              <img src="/logo.jpg" alt="BioConnect" style={{ width: 30, height: 30, borderRadius: "8px", objectFit: "cover" }} />
-              <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "18px", color: "#fff" }}>BioConnect</span>
+      <footer className="footer">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <div className="logo">
+              <img src="/logo.jpg" alt="BioConnect" style={{ width: 28, height: 28, borderRadius: "8px", objectFit: "cover" }} />
+              <span>BioConnect</span>
             </div>
-            <p style={{ fontSize: "14px", color: "#6a6a8a", lineHeight: "1.7", maxWidth: "260px" }}>
-              Connecting India&apos;s biotech community — students, educators, researchers, and industry.
-            </p>
+            <p>Connecting India's biotech community — students, educators, researchers, and industry.</p>
           </div>
-
-          {/* Links */}
           {[
-            { heading: "Platform", links: [{ name: "Learning Hub", href: "/learning" }, { name: "Research Papers", href: "/research" }, { name: "Events", href: "/event" }] },
-            { heading: "Account", links: [{ name: "Sign Up", href: "/signup" }, { name: "Login", href: "/login" }, { name: "Dashboard", href: "/dashboard" }] },
-            { heading: "Support", links: [{ name: "Help Center", href: "#" }, { name: "Privacy Policy", href: "#" }, { name: "Terms of Service", href: "#" }] },
+            { heading: "Platform", links: [{ n: "Learning Hub", h: "/learning" }, { n: "Research Papers", h: "/research" }, { n: "Events", h: "/event" }] },
+            { heading: "Account", links: [{ n: "Sign Up", h: "/signup" }, { n: "Login", h: "/login" }, { n: "Dashboard", h: "/dashboard" }] },
+            { heading: "Support", links: [{ n: "Help Center", h: "#" }, { n: "Privacy Policy", h: "#" }, { n: "Terms of Service", h: "#" }] },
           ].map((col) => (
-            <div key={col.heading}>
-              <h4 style={{ fontSize: "13px", fontWeight: "600", color: "#fff", marginBottom: "16px", letterSpacing: "0.5px" }}>{col.heading}</h4>
-              <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
-                {col.links.map((l) => (
-                  <li key={l.name}>
-                    <a href={l.href} style={{ fontSize: "14px", color: "#6a6a8a", transition: "color 0.2s" }}
-                      onMouseOver={e => e.target.style.color = "#C8C4F6"}
-                      onMouseOut={e => e.target.style.color = "#6a6a8a"}
-                    >{l.name}</a>
-                  </li>
-                ))}
-              </ul>
+            <div key={col.heading} className="footer-col">
+              <h4>{col.heading}</h4>
+              {col.links.map((l) => <a key={l.n} href={l.h}>{l.n}</a>)}
             </div>
           ))}
         </div>
-
-        <div style={{ borderTop: "1px solid #2a2a4a", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <p style={{ fontSize: "13px", color: "#4a4a6a" }}>© 2026 BioConnect. Made with care for India&apos;s biotech community.</p>
-          <p style={{ fontSize: "13px", color: "#4a4a6a" }}>Built in India 🇮🇳</p>
+        <div className="footer-bottom">
+          <span>© 2026 BioConnect. Made with care for India's biotech community.</span>
+          <span>Built in India 🇮🇳</span>
         </div>
       </footer>
-
     </main>
   );
 }
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Instrument+Serif&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: #fafaf9; font-family: 'Outfit', sans-serif; color: #1c1917; overflow-x: hidden; }
+::selection { background: rgba(13,148,136,0.3); }
+a { text-decoration: none; color: inherit; }
+
+/* ── Fade animation ── */
+.fade-in { opacity: 0; transform: var(--from, translateY(40px)); transition: opacity 0.7s ease var(--delay, 0ms), transform 0.7s ease var(--delay, 0ms); }
+.fade-in.visible { opacity: 1; transform: translate(0); }
+
+/* ── Cursor blink ── */
+.cursor { animation: blink 0.8s infinite; font-weight: 300; color: #0D9488; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Nav ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 68px;
+  background: rgba(10,10,10,0.7); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo span { font-family: 'Instrument Serif', serif; font-size: 22px; color: #fff; }
+.nav-links { display: flex; gap: 8px; }
+.nav-links a { font-size: 14px; color: rgba(255,255,255,0.6); padding: 7px 14px; border-radius: 8px; transition: all 0.2s; font-weight: 400; }
+.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-cta { display: flex; align-items: center; gap: 10px; }
+.nav-login { font-size: 14px; color: rgba(255,255,255,0.6); padding: 7px 14px; border-radius: 8px; transition: all 0.2s; }
+.nav-login:hover { color: #fff; }
+.nav-btn { font-size: 14px; font-weight: 500; color: #0a0a0a; background: #0D9488; padding: 9px 22px; border-radius: 10px; transition: all 0.2s; }
+.nav-btn:hover { background: #0f766e; transform: translateY(-1px); }
+
+/* ── Hero ── */
+.hero {
+  position: relative; min-height: 100vh; display: flex; align-items: center;
+  padding: 100px 48px 80px; background: #0a0a0a; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(13,148,136,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.1) 0%, transparent 50%);
+}
+.hero-grid { position: relative; display: flex; align-items: center; gap: 80px; width: 100%; max-width: 1280px; margin: 0 auto; }
+.hero-left { flex: 1; min-width: 0; }
+.hero-right { flex: 1; min-width: 0; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(13,148,136,0.12); border: 1px solid rgba(13,148,136,0.25);
+  border-radius: 100px; padding: 8px 18px; font-size: 13px; color: #5eead4;
+  font-weight: 500; margin-bottom: 28px;
+}
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #0D9488; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,0.4)} 50%{box-shadow:0 0 0 8px rgba(13,148,136,0)} }
+.hero-title {
+  font-family: 'Instrument Serif', serif; font-size: 64px; line-height: 1.1;
+  color: #fff; margin-bottom: 20px; min-height: 80px;
+}
+.hero-subtitle { font-size: 18px; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 36px; max-width: 480px; font-weight: 300; }
+.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+.btn-primary {
+  background: #0D9488; color: #fff; padding: 14px 32px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; font-family: inherit;
+}
+.btn-primary:hover { background: #0f766e; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(13,148,136,0.3); }
+.btn-ghost { color: rgba(255,255,255,0.6); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 400; border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+.hero-stats { display: flex; align-items: center; gap: 24px; }
+.hero-stat { display: flex; flex-direction: column; }
+.hero-stat strong { font-size: 28px; font-weight: 700; color: #fff; font-family: 'Instrument Serif', serif; }
+.hero-stat span { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.hero-stat-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.1); }
+
+/* ── Hero visual (floating cards) ── */
+.hero-visual { position: relative; height: 420px; }
+.hero-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(13,148,136,0.2) 0%, transparent 70%);
+  filter: blur(40px); animation: glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse { 0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)} }
+.hero-card {
+  position: absolute; display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px); border-radius: 14px; padding: 16px 20px;
+  animation: float 6s ease-in-out infinite;
+}
+.hero-card strong { display: block; font-size: 14px; color: #fff; font-weight: 500; }
+.hero-card span { font-size: 12px; color: rgba(255,255,255,0.45); }
+.hc-icon { font-size: 28px; }
+.hc1 { top: 40px; left: 20px; animation-delay: 0s; }
+.hc2 { top: 180px; right: 0px; animation-delay: 1.5s; }
+.hc3 { bottom: 40px; left: 40px; animation-delay: 3s; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+/* ── Sections ── */
+.section-light { padding: 100px 48px; background: #fafaf9; }
+.section-dark { padding: 100px 48px; background: #0a0a0a; }
+.section-title { font-family: 'Instrument Serif', serif; font-size: 40px; text-align: center; margin-bottom: 12px; letter-spacing: -0.5px; }
+.section-title.light { color: #fff; }
+.section-sub { font-size: 16px; color: #78716c; text-align: center; margin-bottom: 56px; font-weight: 300; }
+.section-sub.light { color: rgba(255,255,255,0.45); }
+
+/* ── Bento grid ── */
+.bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1100px; margin: 0 auto; }
+.bento-card {
+  background: #fff; border: 1px solid #e7e5e4; border-radius: 18px; padding: 32px 28px;
+  transition: all 0.3s; cursor: default; position: relative; overflow: hidden;
+}
+.bento-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent, #0D9488); opacity: 0; transition: opacity 0.3s;
+}
+.bento-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
+.bento-card:hover::before { opacity: 1; }
+.bento-large { grid-column: span 2; }
+.bento-icon { font-size: 32px; display: block; margin-bottom: 16px; }
+.bento-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #1c1917; }
+.bento-card p { font-size: 14px; color: #78716c; line-height: 1.6; }
+
+/* ── Steps ── */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.step-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px; padding: 36px 28px; transition: all 0.3s;
+}
+.step-card:hover { border-color: rgba(13,148,136,0.3); background: rgba(13,148,136,0.05); }
+.step-num { font-family: 'Instrument Serif', serif; font-size: 48px; color: rgba(13,148,136,0.3); display: block; margin-bottom: 16px; }
+.step-card h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.step-card p { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.6; font-weight: 300; }
+
+/* ── Roles ── */
+.roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.role-card {
+  background: #fff; border: 1px solid #e7e5e4; border-radius: 18px; padding: 36px 28px;
+  transition: all 0.3s;
+}
+.role-card:hover { border-color: var(--rcbr); background: var(--rcbg); transform: translateY(-4px); }
+.role-badge {
+  display: inline-block; font-size: 13px; font-weight: 600; color: var(--rc);
+  background: var(--rcbg); border: 1px solid var(--rcbr); border-radius: 100px;
+  padding: 5px 16px; margin-bottom: 20px;
+}
+.role-desc { font-size: 14px; color: #78716c; line-height: 1.65; margin-bottom: 20px; }
+.role-points { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.role-points li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #44403c; }
+.role-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rc); flex-shrink: 0; }
+
+/* ── CTA ── */
+.cta-section {
+  padding: 100px 48px; text-align: center;
+  background: linear-gradient(135deg, #0D9488 0%, #0f766e 40%, #115e59 100%);
+}
+.cta-section h2 { font-family: 'Instrument Serif', serif; font-size: 40px; color: #fff; margin-bottom: 12px; }
+.cta-section p { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 36px; font-weight: 300; }
+.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.cta-section .btn-primary { background: #fff; color: #0D9488; }
+.cta-section .btn-primary:hover { background: #f0fdfa; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+.btn-ghost-light { color: rgba(255,255,255,0.7); padding: 14px 28px; font-size: 15px; border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; transition: all 0.2s; }
+.btn-ghost-light:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+
+/* ── Footer ── */
+.footer { background: #0a0a0a; padding: 64px 48px 32px; }
+.footer-top { display: flex; gap: 60px; margin-bottom: 48px; max-width: 1100px; margin-left: auto; margin-right: auto; margin-bottom: 48px; }
+.footer-brand { flex: 1.3; }
+.footer-brand .logo span { color: #fff; }
+.footer-brand p { font-size: 14px; color: #57534e; line-height: 1.7; margin-top: 14px; max-width: 260px; }
+.footer-col { display: flex; flex-direction: column; gap: 10px; }
+.footer-col h4 { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.5px; margin-bottom: 6px; }
+.footer-col a { font-size: 14px; color: #57534e; transition: color 0.2s; }
+.footer-col a:hover { color: #5eead4; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px;
+  display: flex; justify-content: space-between; font-size: 13px; color: #44403c;
+  max-width: 1100px; margin: 0 auto;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-cta .nav-login { display: none; }
+  .hero { padding: 100px 20px 60px; }
+  .hero-grid { flex-direction: column; gap: 40px; }
+  .hero-title { font-size: 40px; }
+  .hero-right { display: none; }
+  .section-light, .section-dark { padding: 60px 20px; }
+  .bento { grid-template-columns: 1fr; }
+  .bento-large { grid-column: span 1; }
+  .steps { grid-template-columns: 1fr; }
+  .roles-grid { grid-template-columns: 1fr; }
+  .cta-section { padding: 60px 20px; }
+  .footer { padding: 40px 20px 24px; }
+  .footer-top { flex-direction: column; gap: 32px; }
+  .section-title { font-size: 30px; }
+  .cta-section h2 { font-size: 30px; }
+  .hero-stats { gap: 16px; }
+  .hero-stat strong { font-size: 22px; }
+}
+`;
