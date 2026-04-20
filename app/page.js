@@ -2,292 +2,235 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-/* ── Scroll-triggered fade ── */
+/* ── Scroll reveal ── */
 function useFadeIn() {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add("visible"); } },
-      { threshold: 0.1 }
-    );
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) el.classList.add("vis"); }, { threshold: 0.08 });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
   return ref;
 }
-function Fade({ children, delay = 0, className = "", dir = "up" }) {
+function F({ children, d = 0, className = "" }) {
   const ref = useFadeIn();
-  const transforms = { up: "translateY(40px)", left: "translateX(-40px)", right: "translateX(40px)" };
-  return (
-    <div ref={ref} className={`fade-in ${className}`} style={{ "--delay": `${delay}ms`, "--from": transforms[dir] || transforms.up }}>
-      {children}
-    </div>
-  );
+  return <div ref={ref} className={`fi ${className}`} style={{ "--d": `${d}ms` }}>{children}</div>;
 }
 
-/* ── Animated counter ── */
+/* ── Counter ── */
 function Counter({ target, suffix = "" }) {
-  const [count, setCount] = useState(0);
+  const [c, setC] = useState(0);
   const ref = useRef(null);
-  const started = useRef(false);
+  const go = useRef(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started.current) {
-        started.current = true;
-        const num = parseInt(target) || 0;
-        const duration = 1500;
-        const step = Math.max(1, Math.floor(num / (duration / 16)));
-        let current = 0;
-        const timer = setInterval(() => {
-          current += step;
-          if (current >= num) { current = num; clearInterval(timer); }
-          setCount(current);
-        }, 16);
+      if (e.isIntersecting && !go.current) {
+        go.current = true;
+        const n = parseInt(target) || 0;
+        const s = Math.max(1, Math.floor(n / 90));
+        let cur = 0;
+        const t = setInterval(() => { cur += s; if (cur >= n) { cur = n; clearInterval(t); } setC(cur); }, 16);
       }
     }, { threshold: 0.3 });
     obs.observe(el);
     return () => obs.disconnect();
   }, [target]);
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{c.toLocaleString()}{suffix}</span>;
 }
 
-/* ── Typing effect ── */
-function TypeWriter({ words, speed = 100, pause = 2000 }) {
-  const [text, setText] = useState("");
-  const [wordIdx, setWordIdx] = useState(0);
-  const [charIdx, setCharIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
+/* ── Typewriter ── */
+function Typer({ words }) {
+  const [txt, setTxt] = useState("");
+  const [wi, setWi] = useState(0);
+  const [ci, setCi] = useState(0);
+  const [del, setDel] = useState(false);
   useEffect(() => {
-    const word = words[wordIdx];
-    const timeout = setTimeout(() => {
-      if (!deleting) {
-        setText(word.substring(0, charIdx + 1));
-        if (charIdx + 1 === word.length) {
-          setTimeout(() => setDeleting(true), pause);
-        } else {
-          setCharIdx(charIdx + 1);
-        }
-      } else {
-        setText(word.substring(0, charIdx));
-        if (charIdx === 0) {
-          setDeleting(false);
-          setWordIdx((wordIdx + 1) % words.length);
-        } else {
-          setCharIdx(charIdx - 1);
-        }
-      }
-    }, deleting ? speed / 2 : speed);
-    return () => clearTimeout(timeout);
-  }, [charIdx, deleting, wordIdx, words, speed, pause]);
-  return <span>{text}<span className="cursor">|</span></span>;
+    const w = words[wi];
+    const t = setTimeout(() => {
+      if (!del) { setTxt(w.substring(0, ci + 1)); if (ci + 1 === w.length) setTimeout(() => setDel(true), 1800); else setCi(ci + 1); }
+      else { setTxt(w.substring(0, ci)); if (ci === 0) { setDel(false); setWi((wi + 1) % words.length); } else setCi(ci - 1); }
+    }, del ? 50 : 110);
+    return () => clearTimeout(t);
+  }, [ci, del, wi, words]);
+  return <>{txt}<span className="caret">|</span></>;
 }
-
-/* ── Data ── */
-const features = [
-  { icon: "🧬", title: "Learning Hub", desc: "Subject-wise PDF notes and study materials uploaded by educators.", size: "large", color: "#0D9488" },
-  { icon: "📄", title: "Research Papers", desc: "Browse and share scientific publications.", size: "small", color: "#F59E0B" },
-  { icon: "📅", title: "Events", desc: "Conferences, webinars, and workshops.", size: "small", color: "#8B5CF6" },
-  { icon: "👤", title: "Role-Based Profiles", desc: "Tailored for students, educators, researchers.", size: "small", color: "#EC4899" },
-  { icon: "🔬", title: "Academic Ecosystem", desc: "One platform connecting India's entire biotech community.", size: "large", color: "#3B82F6" },
-];
-
-const roles = [
-  { label: "Students", color: "#0D9488", bg: "rgba(13,148,136,0.1)", border: "rgba(13,148,136,0.25)", desc: "Access learning resources, find study materials, and build your academic foundation.", points: ["Subject-wise notes", "Research access", "Event discovery", "Peer community"] },
-  { label: "Educators", color: "#F59E0B", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.25)", desc: "Upload content, share knowledge, and connect with students across universities.", points: ["Upload study materials", "Publish research", "Host events", "Track engagement"] },
-  { label: "Researchers", color: "#8B5CF6", bg: "rgba(139,92,246,0.1)", border: "rgba(139,92,246,0.25)", desc: "Share findings, collaborate on projects, and stay updated with the latest publications.", points: ["Share papers", "Find collaborators", "Conference updates", "Grant opportunities"] },
-];
-
-const steps = [
-  { num: "01", title: "Create your account", desc: "Sign up in 30 seconds. Choose your role — student, educator, or researcher." },
-  { num: "02", title: "Explore the platform", desc: "Browse study materials, research papers, and upcoming events." },
-  { num: "03", title: "Start contributing", desc: "Upload notes, share research, or register for events." },
-];
 
 export default function Home() {
-  const [stats, setStats] = useState({ users: 0, papers: 0, events: 0, subjects: 6 });
-
+  const [stats, setStats] = useState({ users: 0, papers: 0, events: 0 });
   useEffect(() => {
-    async function loadStats() {
-      const supabase = createClient();
+    async function load() {
+      const sb = createClient();
       const [u, p, e] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("research_papers").select("id", { count: "exact", head: true }),
-        supabase.from("events").select("id", { count: "exact", head: true }),
+        sb.from("profiles").select("id", { count: "exact", head: true }),
+        sb.from("research_papers").select("id", { count: "exact", head: true }),
+        sb.from("events").select("id", { count: "exact", head: true }),
       ]);
-      setStats({ users: u.count || 0, papers: p.count || 0, events: e.count || 0, subjects: 6 });
+      setStats({ users: u.count || 0, papers: p.count || 0, events: e.count || 0 });
     }
-    loadStats();
+    load();
   }, []);
 
   return (
     <main>
       <style>{CSS}</style>
 
-      {/* ── NAVBAR ── */}
+      {/* ── NAV ── */}
       <nav className="nav">
-        <a href="/" className="logo">
-          <img src="/logo.jpg" alt="BioConnect" style={{ width: 34, height: 34, borderRadius: "10px", objectFit: "cover" }} />
+        <a href="/" className="n-logo">
+          <img src="/logo.jpg" alt="" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} />
           <span>BioConnect</span>
         </a>
-        <div className="nav-links">
+        <div className="n-links">
           <a href="#features">Features</a>
           <a href="#roles">For you</a>
           <a href="#how">How it works</a>
         </div>
-        <div className="nav-cta">
-          <a href="/login" className="nav-login">Login</a>
-          <a href="/signup" className="nav-btn">Get Started</a>
+        <div className="n-cta">
+          <a href="/login" className="n-login">Login</a>
+          <a href="/signup" className="n-btn">Get Started</a>
         </div>
       </nav>
 
-      {/* ── HERO (Dark) ── */}
+      {/* ── HERO ── */}
       <section className="hero">
-        <div className="hero-bg"></div>
-        <div className="hero-grid">
-          <div className="hero-left">
-            <Fade delay={0}>
-              <div className="hero-badge">
-                <span className="badge-dot"></span>
-                India's Biotech Academic Platform
-              </div>
-            </Fade>
-            <Fade delay={100}>
-              <h1 className="hero-title">
-                <TypeWriter words={["Learn.", "Connect.", "Innovate.", "Discover.", "Collaborate."]} speed={120} pause={1800} />
-              </h1>
-              <p className="hero-subtitle">
-                The unified platform where biotech students, educators, and researchers come together to learn, share, and grow.
-              </p>
-            </Fade>
-            <Fade delay={200}>
-              <div className="hero-btns">
-                <a href="/signup" className="btn-primary">Join BioConnect — it's free</a>
-                <a href="#features" className="btn-ghost">See features ↓</a>
-              </div>
-            </Fade>
-            <Fade delay={300}>
-              <div className="hero-stats">
-                <div className="hero-stat"><strong><Counter target={stats.users} suffix="+" /></strong><span>Users</span></div>
-                <div className="hero-stat-divider"></div>
-                <div className="hero-stat"><strong><Counter target={stats.papers} suffix="+" /></strong><span>Papers</span></div>
-                <div className="hero-stat-divider"></div>
-                <div className="hero-stat"><strong><Counter target={stats.subjects} /></strong><span>Subjects</span></div>
-              </div>
-            </Fade>
+        <div className="hero-rays"></div>
+        <F><div className="hero-badge"><span className="hb-dot"></span>India's Biotech Academic Platform</div></F>
+        <F d={80}>
+          <h1 className="hero-h1">
+            The Modern Platform for<br />
+            <span className="hero-accent"><Typer words={["Smarter Learning.", "Better Research.", "Real Collaboration."]} /></span>
+          </h1>
+        </F>
+        <F d={160}><p className="hero-p">Access study materials, explore research papers, and connect with biotech students, educators, and researchers — all in one unified platform built for India.</p></F>
+        <F d={240}>
+          <div className="hero-btns">
+            <a href="/signup" className="btn-solid">Join BioConnect — it's free</a>
+            <a href="#features" className="btn-outline">Explore Features</a>
           </div>
-          <Fade delay={250} dir="right" className="hero-right">
-            <div className="hero-visual">
-              <div className="hero-glow"></div>
-              <div className="hero-card hc1">
-                <span className="hc-icon">🧬</span>
-                <div><strong>Molecular Biology</strong><span>12 notes uploaded</span></div>
-              </div>
-              <div className="hero-card hc2">
-                <span className="hc-icon">📄</span>
-                <div><strong>New Research Paper</strong><span>CRISPR-Cas9 Variants</span></div>
-              </div>
-              <div className="hero-card hc3">
-                <span className="hc-icon">📅</span>
-                <div><strong>Upcoming Event</strong><span>Biotech Conference 2026</span></div>
-              </div>
-            </div>
-          </Fade>
-        </div>
+        </F>
+        <F d={320}>
+          <div className="hero-stats">
+            <div className="hs"><strong><Counter target={stats.users} suffix="+" /></strong><span>Users</span></div>
+            <div className="hs-div"></div>
+            <div className="hs"><strong><Counter target={stats.papers} suffix="+" /></strong><span>Papers</span></div>
+            <div className="hs-div"></div>
+            <div className="hs"><strong>6</strong><span>Subjects</span></div>
+            <div className="hs-div"></div>
+            <div className="hs"><strong><Counter target={stats.events} suffix="+" /></strong><span>Events</span></div>
+          </div>
+        </F>
+
+        {/* Floating product preview */}
+        <F d={400}>
+          <div className="hero-preview">
+            <div className="hp-card hp1"><span>🧬</span><div><strong>Molecular Biology</strong><small>12 notes available</small></div></div>
+            <div className="hp-card hp2"><span>📄</span><div><strong>New Paper Published</strong><small>CRISPR-Cas9 Variants</small></div></div>
+            <div className="hp-card hp3"><span>📅</span><div><strong>Upcoming Event</strong><small>Biotech Conference 2026</small></div></div>
+          </div>
+        </F>
       </section>
 
-      {/* ── FEATURES (Bento Grid) ── */}
-      <section id="features" className="section-light">
-        <Fade><h2 className="section-title">Everything you need, in one place</h2></Fade>
-        <Fade delay={50}><p className="section-sub">Built specifically for India's biotech academic community</p></Fade>
-        <div className="bento">
-          {features.map((f, i) => (
-            <Fade key={f.title} delay={i * 80}>
-              <div className={`bento-card ${f.size === "large" ? "bento-large" : ""}`} style={{ "--accent": f.color }}>
-                <span className="bento-icon">{f.icon}</span>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
+      {/* ── FEATURES ── */}
+      <section id="features" className="sec">
+        <F><h2 className="sec-h2">Everything you need, in one place</h2></F>
+        <F d={50}><p className="sec-p">Comprehensive tools designed specifically for India's biotech community</p></F>
+        <div className="feat-grid">
+          {[
+            { icon: "🧬", t: "Learning Hub", d: "Subject-wise PDF notes and study materials uploaded by educators. Access content anytime, anywhere." },
+            { icon: "📄", t: "Research Papers", d: "Browse and share scientific publications with metadata, links, and abstracts." },
+            { icon: "📅", t: "Events & Conferences", d: "Stay updated on webinars, workshops, hackathons, and conferences." },
+            { icon: "👤", t: "Role-Based Profiles", d: "Tailored dashboards for students, educators, and researchers." },
+            { icon: "🔬", t: "Academic Ecosystem", d: "One platform connecting India's entire biotech community — from classrooms to labs." },
+            { icon: "🔒", t: "Secure & Private", d: "Your data stays yours. Role-based access control on all content." },
+          ].map((f, i) => (
+            <F key={f.t} d={i * 60}>
+              <div className="feat-card">
+                <div className="feat-icon">{f.icon}</div>
+                <h3>{f.t}</h3>
+                <p>{f.d}</p>
               </div>
-            </Fade>
+            </F>
           ))}
         </div>
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how" className="section-dark">
-        <Fade><h2 className="section-title light">How it works</h2></Fade>
-        <Fade delay={50}><p className="section-sub light">Get started in 3 simple steps</p></Fade>
-        <div className="steps">
-          {steps.map((s, i) => (
-            <Fade key={s.num} delay={i * 100}>
+      <section id="how" className="sec">
+        <F><h2 className="sec-h2">How it works</h2></F>
+        <F d={50}><p className="sec-p">Get started in 3 simple steps</p></F>
+        <div className="steps-grid">
+          {[
+            { n: "01", t: "Create your account", d: "Sign up in 30 seconds. Choose your role — student, educator, or researcher." },
+            { n: "02", t: "Explore the platform", d: "Browse study materials, research papers, and upcoming biotech events." },
+            { n: "03", t: "Start contributing", d: "Upload notes, share research, register for events, and grow your network." },
+          ].map((s, i) => (
+            <F key={s.n} d={i * 100}>
               <div className="step-card">
-                <span className="step-num">{s.num}</span>
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
+                <span className="step-n">{s.n}</span>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
               </div>
-            </Fade>
+            </F>
           ))}
         </div>
       </section>
 
       {/* ── ROLES ── */}
-      <section id="roles" className="section-light">
-        <Fade><h2 className="section-title">Built for every role in biotech</h2></Fade>
-        <Fade delay={50}><p className="section-sub">Tailored experiences that meet you where you are</p></Fade>
+      <section id="roles" className="sec">
+        <F><h2 className="sec-h2">Built for every role in biotech</h2></F>
+        <F d={50}><p className="sec-p">Tailored experiences that meet you where you are</p></F>
         <div className="roles-grid">
-          {roles.map((r, i) => (
-            <Fade key={r.label} delay={i * 100}>
-              <div className="role-card" style={{ "--rc": r.color, "--rcbg": r.bg, "--rcbr": r.border }}>
-                <span className="role-badge">{r.label}</span>
-                <p className="role-desc">{r.desc}</p>
-                <ul className="role-points">
-                  {r.points.map((p) => (
-                    <li key={p}><span className="role-dot"></span>{p}</li>
-                  ))}
-                </ul>
+          {[
+            { l: "Students", c: "#7c3aed", pts: ["Subject-wise notes", "Research access", "Event discovery", "Peer community"], d: "Access learning resources, find study materials, and build your academic foundation." },
+            { l: "Educators", c: "#0D9488", pts: ["Upload materials", "Publish research", "Host events", "Track engagement"], d: "Upload content, share knowledge, and connect with students across universities." },
+            { l: "Researchers", c: "#d97706", pts: ["Share papers", "Find collaborators", "Conference updates", "Grant opportunities"], d: "Share findings, collaborate on projects, and stay updated with publications." },
+          ].map((r, i) => (
+            <F key={r.l} d={i * 100}>
+              <div className="role-card" style={{ "--rc": r.c }}>
+                <span className="role-badge">{r.l}</span>
+                <p className="role-d">{r.d}</p>
+                <ul>{r.pts.map(p => <li key={p}><span className="role-dot"></span>{p}</li>)}</ul>
               </div>
-            </Fade>
+            </F>
           ))}
         </div>
       </section>
 
-      {/* ── CTA BANNER ── */}
-      <section className="cta-section">
-        <Fade>
+      {/* ── CTA ── */}
+      <section className="cta">
+        <F>
           <h2>Ready to transform your biotech journey?</h2>
           <p>Join students, educators, and researchers across India</p>
           <div className="cta-btns">
-            <a href="/signup" className="btn-primary">Get Started Free</a>
-            <a href="/login" className="btn-ghost-light">Already have an account?</a>
+            <a href="/signup" className="btn-solid">Get Started Free</a>
+            <a href="/login" className="btn-outline">Already have an account?</a>
           </div>
-        </Fade>
+        </F>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="footer">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <div className="logo">
-              <img src="/logo.jpg" alt="BioConnect" style={{ width: 28, height: 28, borderRadius: "8px", objectFit: "cover" }} />
-              <span>BioConnect</span>
-            </div>
+      <footer className="foot">
+        <div className="foot-top">
+          <div className="foot-brand">
+            <div className="n-logo"><img src="/logo.jpg" alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} /><span>BioConnect</span></div>
             <p>Connecting India's biotech community — students, educators, researchers, and industry.</p>
           </div>
           {[
-            { heading: "Platform", links: [{ n: "Learning Hub", h: "/learning" }, { n: "Research Papers", h: "/research" }, { n: "Events", h: "/event" }] },
-            { heading: "Account", links: [{ n: "Sign Up", h: "/signup" }, { n: "Login", h: "/login" }, { n: "Dashboard", h: "/dashboard" }] },
-            { heading: "Support", links: [{ n: "Help Center", h: "#" }, { n: "Privacy Policy", h: "#" }, { n: "Terms of Service", h: "#" }] },
-          ].map((col) => (
-            <div key={col.heading} className="footer-col">
-              <h4>{col.heading}</h4>
-              {col.links.map((l) => <a key={l.n} href={l.h}>{l.n}</a>)}
+            { h: "Platform", links: [["Learning Hub", "/learning"], ["Research Papers", "/research"], ["Events", "/event"]] },
+            { h: "Account", links: [["Sign Up", "/signup"], ["Login", "/login"], ["Dashboard", "/dashboard"]] },
+            { h: "Support", links: [["Help Center", "#"], ["Privacy Policy", "#"], ["Terms of Service", "#"]] },
+          ].map(col => (
+            <div key={col.h} className="foot-col">
+              <h4>{col.h}</h4>
+              {col.links.map(([n, h]) => <a key={n} href={h}>{n}</a>)}
             </div>
           ))}
         </div>
-        <div className="footer-bottom">
+        <div className="foot-bot">
           <span>© 2026 BioConnect. Made with care for India's biotech community.</span>
           <span>Built in India 🇮🇳</span>
         </div>
@@ -297,206 +240,196 @@ export default function Home() {
 }
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Instrument+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { background: #fafaf9; font-family: 'Outfit', sans-serif; color: #1c1917; overflow-x: hidden; }
-::selection { background: rgba(13,148,136,0.3); }
-a { text-decoration: none; color: inherit; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#1e1b4b;overflow-x:hidden;
+  background:linear-gradient(180deg,#ede9fe 0%,#e0e7ff 30%,#f5f3ff 60%,#faf5ff 100%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(124,58,237,0.2)}
+a{text-decoration:none;color:inherit}
 
-/* ── Fade animation ── */
-.fade-in { opacity: 0; transform: var(--from, translateY(40px)); transition: opacity 0.7s ease var(--delay, 0ms), transform 0.7s ease var(--delay, 0ms); }
-.fade-in.visible { opacity: 1; transform: translate(0); }
+/* ── Fade ── */
+.fi{opacity:0;transform:translateY(32px);transition:opacity .7s ease var(--d,0ms),transform .7s ease var(--d,0ms)}
+.fi.vis{opacity:1;transform:translateY(0)}
 
-/* ── Cursor blink ── */
-.cursor { animation: blink 0.8s infinite; font-weight: 300; color: #0D9488; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+/* ── Caret ── */
+.caret{color:#7c3aed;animation:blink .8s infinite;font-weight:300}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ── Nav ── */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px; height: 68px;
-  background: rgba(10,10,10,0.7); backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:68px;
+  background:rgba(237,233,254,0.6);backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(124,58,237,0.08);
 }
-.logo { display: flex; align-items: center; gap: 10px; }
-.logo span { font-family: 'Instrument Serif', serif; font-size: 22px; color: #fff; }
-.nav-links { display: flex; gap: 8px; }
-.nav-links a { font-size: 14px; color: rgba(255,255,255,0.6); padding: 7px 14px; border-radius: 8px; transition: all 0.2s; font-weight: 400; }
-.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
-.nav-cta { display: flex; align-items: center; gap: 10px; }
-.nav-login { font-size: 14px; color: rgba(255,255,255,0.6); padding: 7px 14px; border-radius: 8px; transition: all 0.2s; }
-.nav-login:hover { color: #fff; }
-.nav-btn { font-size: 14px; font-weight: 500; color: #0a0a0a; background: #0D9488; padding: 9px 22px; border-radius: 10px; transition: all 0.2s; }
-.nav-btn:hover { background: #0f766e; transform: translateY(-1px); }
+.n-logo{display:flex;align-items:center;gap:10px}
+.n-logo span{font-family:'Instrument Serif',serif;font-size:22px;color:#1e1b4b}
+.n-links{display:flex;gap:6px}
+.n-links a{font-size:14px;color:#6b7280;padding:8px 16px;border-radius:10px;transition:all .2s;font-weight:400}
+.n-links a:hover{color:#7c3aed;background:rgba(124,58,237,0.06)}
+.n-cta{display:flex;align-items:center;gap:10px}
+.n-login{font-size:14px;color:#6b7280;padding:8px 16px;border-radius:10px;transition:all .2s}
+.n-login:hover{color:#7c3aed}
+.n-btn{font-size:14px;font-weight:600;color:#fff;background:#7c3aed;padding:10px 24px;border-radius:12px;transition:all .2s}
+.n-btn:hover{background:#6d28d9;transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,0.25)}
 
 /* ── Hero ── */
-.hero {
-  position: relative; min-height: 100vh; display: flex; align-items: center;
-  padding: 100px 48px 80px; background: #0a0a0a; overflow: hidden;
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:120px 48px 80px;overflow:hidden;
 }
-.hero-bg {
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(13,148,136,0.15) 0%, transparent 60%),
-              radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.1) 0%, transparent 50%);
+.hero-rays{
+  position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+  width:1200px;height:800px;
+  background:radial-gradient(ellipse at center,rgba(124,58,237,0.12) 0%,rgba(99,102,241,0.08) 30%,transparent 70%);
+  pointer-events:none;
 }
-.hero-grid { position: relative; display: flex; align-items: center; gap: 80px; width: 100%; max-width: 1280px; margin: 0 auto; }
-.hero-left { flex: 1; min-width: 0; }
-.hero-right { flex: 1; min-width: 0; }
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(13,148,136,0.12); border: 1px solid rgba(13,148,136,0.25);
-  border-radius: 100px; padding: 8px 18px; font-size: 13px; color: #5eead4;
-  font-weight: 500; margin-bottom: 28px;
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.15);
+  border-radius:100px;padding:8px 20px;font-size:13px;color:#7c3aed;font-weight:500;margin-bottom:32px;
 }
-.badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #0D9488; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,0.4)} 50%{box-shadow:0 0 0 8px rgba(13,148,136,0)} }
-.hero-title {
-  font-family: 'Instrument Serif', serif; font-size: 64px; line-height: 1.1;
-  color: #fff; margin-bottom: 20px; min-height: 80px;
-}
-.hero-subtitle { font-size: 18px; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 36px; max-width: 480px; font-weight: 300; }
-.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
-.btn-primary {
-  background: #0D9488; color: #fff; padding: 14px 32px; border-radius: 12px;
-  font-size: 15px; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; font-family: inherit;
-}
-.btn-primary:hover { background: #0f766e; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(13,148,136,0.3); }
-.btn-ghost { color: rgba(255,255,255,0.6); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 400; border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s; }
-.btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
-.hero-stats { display: flex; align-items: center; gap: 24px; }
-.hero-stat { display: flex; flex-direction: column; }
-.hero-stat strong { font-size: 28px; font-weight: 700; color: #fff; font-family: 'Instrument Serif', serif; }
-.hero-stat span { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-.hero-stat-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.1); }
+.hb-dot{width:8px;height:8px;border-radius:50%;background:#7c3aed;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.3)}50%{box-shadow:0 0 0 8px rgba(124,58,237,0)}}
 
-/* ── Hero visual (floating cards) ── */
-.hero-visual { position: relative; height: 420px; }
-.hero-glow {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(13,148,136,0.2) 0%, transparent 70%);
-  filter: blur(40px); animation: glowPulse 4s ease-in-out infinite;
+.hero-h1{font-family:'Instrument Serif',serif;font-size:60px;line-height:1.12;color:#1e1b4b;margin-bottom:24px;letter-spacing:-1px}
+.hero-accent{color:#7c3aed;display:inline}
+.hero-p{font-size:18px;color:#6b7280;line-height:1.7;max-width:580px;margin:0 auto 40px;font-weight:300}
+
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+.btn-solid{
+  background:#7c3aed;color:#fff;padding:14px 32px;border-radius:14px;
+  font-size:15px;font-weight:600;transition:all .25s;border:none;cursor:pointer;font-family:inherit;
 }
-@keyframes glowPulse { 0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)} }
-.hero-card {
-  position: absolute; display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  backdrop-filter: blur(20px); border-radius: 14px; padding: 16px 20px;
-  animation: float 6s ease-in-out infinite;
+.btn-solid:hover{background:#6d28d9;transform:translateY(-2px);box-shadow:0 12px 32px rgba(124,58,237,0.3)}
+.btn-outline{
+  color:#7c3aed;padding:14px 28px;border-radius:14px;font-size:15px;font-weight:500;
+  border:1.5px solid rgba(124,58,237,0.2);transition:all .25s;background:rgba(255,255,255,0.5);
 }
-.hero-card strong { display: block; font-size: 14px; color: #fff; font-weight: 500; }
-.hero-card span { font-size: 12px; color: rgba(255,255,255,0.45); }
-.hc-icon { font-size: 28px; }
-.hc1 { top: 40px; left: 20px; animation-delay: 0s; }
-.hc2 { top: 180px; right: 0px; animation-delay: 1.5s; }
-.hc3 { bottom: 40px; left: 40px; animation-delay: 3s; }
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.btn-outline:hover{border-color:#7c3aed;background:rgba(124,58,237,0.05)}
+
+.hero-stats{display:flex;align-items:center;gap:28px;margin-bottom:56px}
+.hs{display:flex;flex-direction:column;align-items:center}
+.hs strong{font-size:32px;font-weight:700;color:#1e1b4b;font-family:'Instrument Serif',serif}
+.hs span{font-size:11px;color:#9ca3af;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+.hs-div{width:1px;height:32px;background:rgba(124,58,237,0.12)}
+
+/* ── Hero preview cards ── */
+.hero-preview{position:relative;width:100%;max-width:700px;height:200px;margin:0 auto}
+.hp-card{
+  position:absolute;display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.7);border:1px solid rgba(124,58,237,0.1);
+  backdrop-filter:blur(16px);border-radius:16px;padding:16px 22px;
+  box-shadow:0 8px 32px rgba(124,58,237,0.08);
+  animation:fl 5s ease-in-out infinite;
+}
+.hp-card span{font-size:28px}
+.hp-card strong{display:block;font-size:14px;color:#1e1b4b;font-weight:600}
+.hp-card small{font-size:12px;color:#9ca3af}
+.hp1{top:0;left:0;animation-delay:0s}
+.hp2{top:20px;right:0;animation-delay:1.5s}
+.hp3{bottom:0;left:50%;transform:translateX(-50%);animation-delay:3s}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hp3{animation:fl3 5s ease-in-out 3s infinite}
+@keyframes fl3{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
 
 /* ── Sections ── */
-.section-light { padding: 100px 48px; background: #fafaf9; }
-.section-dark { padding: 100px 48px; background: #0a0a0a; }
-.section-title { font-family: 'Instrument Serif', serif; font-size: 40px; text-align: center; margin-bottom: 12px; letter-spacing: -0.5px; }
-.section-title.light { color: #fff; }
-.section-sub { font-size: 16px; color: #78716c; text-align: center; margin-bottom: 56px; font-weight: 300; }
-.section-sub.light { color: rgba(255,255,255,0.45); }
+.sec{padding:100px 48px;max-width:1200px;margin:0 auto}
+.sec-h2{font-family:'Instrument Serif',serif;font-size:42px;text-align:center;margin-bottom:14px;color:#1e1b4b;letter-spacing:-0.5px}
+.sec-p{font-size:16px;color:#9ca3af;text-align:center;margin-bottom:56px;font-weight:300}
 
-/* ── Bento grid ── */
-.bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1100px; margin: 0 auto; }
-.bento-card {
-  background: #fff; border: 1px solid #e7e5e4; border-radius: 18px; padding: 32px 28px;
-  transition: all 0.3s; cursor: default; position: relative; overflow: hidden;
+/* ── Features ── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.feat-card{
+  background:rgba(255,255,255,0.55);border:1px solid rgba(124,58,237,0.08);
+  border-radius:20px;padding:32px 28px;transition:all .3s;backdrop-filter:blur(8px);
 }
-.bento-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--accent, #0D9488); opacity: 0; transition: opacity 0.3s;
-}
-.bento-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.08); }
-.bento-card:hover::before { opacity: 1; }
-.bento-large { grid-column: span 2; }
-.bento-icon { font-size: 32px; display: block; margin-bottom: 16px; }
-.bento-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #1c1917; }
-.bento-card p { font-size: 14px; color: #78716c; line-height: 1.6; }
+.feat-card:hover{transform:translateY(-6px);box-shadow:0 20px 48px rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.15);background:rgba(255,255,255,0.8)}
+.feat-icon{font-size:32px;margin-bottom:18px;display:block}
+.feat-card h3{font-size:18px;font-weight:600;margin-bottom:8px;color:#1e1b4b}
+.feat-card p{font-size:14px;color:#6b7280;line-height:1.65}
 
 /* ── Steps ── */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
-.step-card {
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px; padding: 36px 28px; transition: all 0.3s;
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.step-card{
+  background:rgba(255,255,255,0.5);border:1px solid rgba(124,58,237,0.08);
+  border-radius:20px;padding:36px 28px;transition:all .3s;backdrop-filter:blur(8px);
 }
-.step-card:hover { border-color: rgba(13,148,136,0.3); background: rgba(13,148,136,0.05); }
-.step-num { font-family: 'Instrument Serif', serif; font-size: 48px; color: rgba(13,148,136,0.3); display: block; margin-bottom: 16px; }
-.step-card h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-.step-card p { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.6; font-weight: 300; }
+.step-card:hover{border-color:rgba(124,58,237,0.2);background:rgba(255,255,255,0.75)}
+.step-n{font-family:'Instrument Serif',serif;font-size:52px;color:rgba(124,58,237,0.2);display:block;margin-bottom:16px;line-height:1}
+.step-card h3{font-size:18px;font-weight:600;color:#1e1b4b;margin-bottom:8px}
+.step-card p{font-size:14px;color:#6b7280;line-height:1.65;font-weight:300}
 
 /* ── Roles ── */
-.roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
-.role-card {
-  background: #fff; border: 1px solid #e7e5e4; border-radius: 18px; padding: 36px 28px;
-  transition: all 0.3s;
+.roles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.role-card{
+  background:rgba(255,255,255,0.55);border:1px solid rgba(124,58,237,0.08);
+  border-radius:20px;padding:36px 28px;transition:all .3s;backdrop-filter:blur(8px);
 }
-.role-card:hover { border-color: var(--rcbr); background: var(--rcbg); transform: translateY(-4px); }
-.role-badge {
-  display: inline-block; font-size: 13px; font-weight: 600; color: var(--rc);
-  background: var(--rcbg); border: 1px solid var(--rcbr); border-radius: 100px;
-  padding: 5px 16px; margin-bottom: 20px;
+.role-card:hover{transform:translateY(-4px);border-color:var(--rc);box-shadow:0 16px 40px rgba(0,0,0,0.06)}
+.role-badge{
+  display:inline-block;font-size:13px;font-weight:600;color:var(--rc);
+  background:color-mix(in srgb,var(--rc) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--rc) 20%,transparent);
+  border-radius:100px;padding:6px 18px;margin-bottom:20px;
 }
-.role-desc { font-size: 14px; color: #78716c; line-height: 1.65; margin-bottom: 20px; }
-.role-points { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.role-points li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #44403c; }
-.role-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rc); flex-shrink: 0; }
+.role-d{font-size:14px;color:#6b7280;line-height:1.65;margin-bottom:20px}
+.role-card ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.role-card li{display:flex;align-items:center;gap:10px;font-size:14px;color:#4b5563}
+.role-dot{width:7px;height:7px;border-radius:50%;background:var(--rc);flex-shrink:0}
 
 /* ── CTA ── */
-.cta-section {
-  padding: 100px 48px; text-align: center;
-  background: linear-gradient(135deg, #0D9488 0%, #0f766e 40%, #115e59 100%);
+.cta{
+  padding:100px 48px;text-align:center;
+  background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 40%,#5b21b6 100%);
+  border-radius:32px;margin:0 24px 24px;
 }
-.cta-section h2 { font-family: 'Instrument Serif', serif; font-size: 40px; color: #fff; margin-bottom: 12px; }
-.cta-section p { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 36px; font-weight: 300; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-.cta-section .btn-primary { background: #fff; color: #0D9488; }
-.cta-section .btn-primary:hover { background: #f0fdfa; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
-.btn-ghost-light { color: rgba(255,255,255,0.7); padding: 14px 28px; font-size: 15px; border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; transition: all 0.2s; }
-.btn-ghost-light:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+.cta h2{font-family:'Instrument Serif',serif;font-size:42px;color:#fff;margin-bottom:14px}
+.cta p{font-size:16px;color:rgba(255,255,255,0.65);margin-bottom:36px;font-weight:300}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cta .btn-solid{background:#fff;color:#7c3aed}
+.cta .btn-solid:hover{background:#f5f3ff;box-shadow:0 12px 32px rgba(0,0,0,0.15)}
+.cta .btn-outline{color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.2);background:transparent}
+.cta .btn-outline:hover{border-color:rgba(255,255,255,0.5);color:#fff}
 
 /* ── Footer ── */
-.footer { background: #0a0a0a; padding: 64px 48px 32px; }
-.footer-top { display: flex; gap: 60px; margin-bottom: 48px; max-width: 1100px; margin-left: auto; margin-right: auto; margin-bottom: 48px; }
-.footer-brand { flex: 1.3; }
-.footer-brand .logo span { color: #fff; }
-.footer-brand p { font-size: 14px; color: #57534e; line-height: 1.7; margin-top: 14px; max-width: 260px; }
-.footer-col { display: flex; flex-direction: column; gap: 10px; }
-.footer-col h4 { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.5px; margin-bottom: 6px; }
-.footer-col a { font-size: 14px; color: #57534e; transition: color 0.2s; }
-.footer-col a:hover { color: #5eead4; }
-.footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px;
-  display: flex; justify-content: space-between; font-size: 13px; color: #44403c;
-  max-width: 1100px; margin: 0 auto;
+.foot{padding:64px 48px 32px;background:#0f0a1e}
+.foot-top{display:flex;gap:60px;margin-bottom:48px;max-width:1100px;margin-left:auto;margin-right:auto;margin-bottom:48px}
+.foot-brand{flex:1.3}
+.foot-brand .n-logo span{color:#fff}
+.foot-brand p{font-size:14px;color:#6b7280;line-height:1.7;margin-top:14px;max-width:260px}
+.foot-col{display:flex;flex-direction:column;gap:10px}
+.foot-col h4{font-size:13px;font-weight:600;color:#fff;letter-spacing:0.5px;margin-bottom:6px}
+.foot-col a{font-size:14px;color:#6b7280;transition:color .2s}
+.foot-col a:hover{color:#a78bfa}
+.foot-bot{
+  border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;
+  display:flex;justify-content:space-between;font-size:13px;color:#4b5563;
+  max-width:1100px;margin:0 auto;
 }
 
 /* ── Mobile ── */
-@media (max-width: 768px) {
-  .nav { padding: 0 20px; }
-  .nav-links { display: none; }
-  .nav-cta .nav-login { display: none; }
-  .hero { padding: 100px 20px 60px; }
-  .hero-grid { flex-direction: column; gap: 40px; }
-  .hero-title { font-size: 40px; }
-  .hero-right { display: none; }
-  .section-light, .section-dark { padding: 60px 20px; }
-  .bento { grid-template-columns: 1fr; }
-  .bento-large { grid-column: span 1; }
-  .steps { grid-template-columns: 1fr; }
-  .roles-grid { grid-template-columns: 1fr; }
-  .cta-section { padding: 60px 20px; }
-  .footer { padding: 40px 20px 24px; }
-  .footer-top { flex-direction: column; gap: 32px; }
-  .section-title { font-size: 30px; }
-  .cta-section h2 { font-size: 30px; }
-  .hero-stats { gap: 16px; }
-  .hero-stat strong { font-size: 22px; }
+@media(max-width:768px){
+  .nav{padding:0 20px}
+  .n-links{display:none}
+  .n-cta .n-login{display:none}
+  .hero{padding:100px 20px 60px}
+  .hero-h1{font-size:36px}
+  .hero-preview{display:none}
+  .hero-stats{gap:16px;flex-wrap:wrap;justify-content:center}
+  .hs strong{font-size:24px}
+  .sec{padding:60px 20px}
+  .sec-h2{font-size:30px}
+  .feat-grid,.steps-grid,.roles-grid{grid-template-columns:1fr}
+  .cta{padding:60px 20px;margin:0 12px 12px;border-radius:20px}
+  .cta h2{font-size:30px}
+  .foot{padding:40px 20px 24px}
+  .foot-top{flex-direction:column;gap:32px}
 }
 `;
