@@ -105,7 +105,7 @@ export default function Home() {
             <span className="hero-accent"><Typer words={["Smarter Learning.", "Better Research.", "Real Collaboration."]} /></span>
           </h1>
         </F>
-        <F d={160}><p className="hero-p">Access study materials, explore research papers, and connect with biotech students, educators, and researchers — all in one unified platform built for India.</p></F>
+        <F d={160}><p className="hero-p">All your biotech notes, research papers, and resources — organized in one place so you never waste time searching again.</p></F>
         <F d={240}>
           <div className="hero-btns">
             <a href="/signup" className="btn-solid">Join BioConnect — it's free</a>
