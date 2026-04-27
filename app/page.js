@@ -123,7 +123,7 @@ export default function Home() {
             <div className="sb-div"></div>
             <div className="sb"><strong><Counter target={stats.papers} suffix="+" /></strong><span>Research Papers</span></div>
             <div className="sb-div"></div>
-            <div className="sb"><strong>6</strong><span>Subjects</span></div>
+            <div className="sb"><strong><Counter target={6} /></strong><span>Subjects</span></div>
             <div className="sb-div"></div>
             <div className="sb"><strong><Counter target={stats.events} suffix="+" /></strong><span>Events</span></div>
           </div>
@@ -313,6 +313,13 @@ a{text-decoration:none;color:inherit}
 .orb3{width:300px;height:300px;background:rgba(168,85,247,0.08);top:40%;left:60%;animation:drift 10s ease-in-out infinite 3s}
 @keyframes drift{0%,100%{transform:translate(0,0)}33%{transform:translate(30px,-20px)}66%{transform:translate(-20px,15px)}}
 
+/* Background grid pattern */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(249,115,22,0.04) 1px,transparent 0);
+  background-size:40px 40px;pointer-events:none;
+}
+
 .hero-badge{
   display:inline-flex;align-items:center;gap:8px;
   background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.15);
@@ -357,9 +364,9 @@ a{text-decoration:none;color:inherit}
 .sb-div{width:1px;height:36px;background:rgba(249,115,22,0.1)}
 
 /* Hero cards */
-.hero-cards{position:relative;width:100%;max-width:720px;height:200px;margin:0 auto}
+.hero-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:0 auto;max-width:900px}
 .hc{
-  position:absolute;display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;gap:12px;
   background:rgba(255,255,255,0.8);border:1px solid rgba(249,115,22,0.08);
   backdrop-filter:blur(16px);border-radius:16px;padding:16px 22px;
   box-shadow:0 8px 32px rgba(249,115,22,0.06);
@@ -367,11 +374,10 @@ a{text-decoration:none;color:inherit}
 .hc span{font-size:28px}
 .hc strong{display:block;font-size:14px;color:#0C1222;font-weight:600}
 .hc small{font-size:12px;color:#9ca3af}
-.hc1{top:0;left:0;animation:fl 5s ease-in-out infinite}
-.hc2{top:20px;right:0;animation:fl 5s ease-in-out 1.5s infinite}
-.hc3{bottom:0;left:50%;transform:translateX(-50%);animation:fl3 5s ease-in-out 3s infinite}
+.hc1{animation:fl 5s ease-in-out infinite}
+.hc2{animation:fl 5s ease-in-out 1.5s infinite}
+.hc3{animation:fl 5s ease-in-out 3s infinite}
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@keyframes fl3{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
 
 /* ── Marquee ── */
 .marquee-wrap{
@@ -394,6 +400,7 @@ a{text-decoration:none;color:inherit}
 .feat-card{
   position:relative;background:#fff;border:1px solid rgba(249,115,22,0.06);
   border-radius:20px;padding:32px 28px;transition:all .3s;overflow:hidden;
+  height:100%;display:flex;flex-direction:column;
 }
 .feat-card:hover{transform:translateY(-6px);box-shadow:0 20px 48px rgba(249,115,22,0.08);border-color:rgba(249,115,22,0.12)}
 .feat-card::after{
@@ -407,7 +414,7 @@ a{text-decoration:none;color:inherit}
 }
 .feat-icon{font-size:32px;margin-bottom:18px;display:block}
 .feat-card h3{font-size:18px;font-weight:600;margin-bottom:8px;color:#0C1222}
-.feat-card p{font-size:14px;color:#6b7280;line-height:1.65}
+.feat-card p{font-size:14px;color:#6b7280;line-height:1.65;flex:1}
 
 /* ── Steps ── */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -427,6 +434,7 @@ a{text-decoration:none;color:inherit}
 .role-card{
   background:#fff;border:1px solid rgba(0,0,0,0.04);
   border-radius:20px;padding:36px 28px;transition:all .3s;
+  height:100%;display:flex;flex-direction:column;
 }
 .role-card:hover{transform:translateY(-4px);border-color:var(--rc);box-shadow:0 16px 40px rgba(0,0,0,0.05)}
 .role-emoji{font-size:40px;margin-bottom:16px}
@@ -436,7 +444,7 @@ a{text-decoration:none;color:inherit}
   border:1px solid color-mix(in srgb,var(--rc) 18%,transparent);
   border-radius:100px;padding:6px 18px;margin-bottom:16px;
 }
-.role-d{font-size:14px;color:#6b7280;line-height:1.65;margin-bottom:20px}
+.role-d{font-size:14px;color:#6b7280;line-height:1.65;margin-bottom:20px;flex:1}
 .role-card ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 .role-card li{display:flex;align-items:center;gap:10px;font-size:14px;color:#4b5563}
 .role-dot{width:7px;height:7px;border-radius:50%;background:var(--rc);flex-shrink:0}
