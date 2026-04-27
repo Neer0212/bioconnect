@@ -6,153 +6,48 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const supabase = createClient();
   const router = useRouter();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  } // Simple form state management: when an input changes, update the corresponding field in the form state
+  function handleChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
 
   async function handleSubmit(e) {
-    e.preventDefault(); // Stops page refresh
-    setLoading(true);
-    setError("");
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    }); // Attempt to sign in with SPB using the email and password from the form. If there's an error, it will be stored in signInError
-
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(false);
-      return; // If there's an error during sign-in, show the error message and stop loading
-    }
-
-    router.push("/dashboard"); // If sign-in is successful, redirect to the dashboard page
+    e.preventDefault(); setLoading(true); setError("");
+    const { error: err } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+    if (err) { setError(err.message); setLoading(false); return; }
+    router.push("/dashboard");
   }
 
   return (
-    <main style={styles.page}>
-      <style>{globalCSS}</style>
-
-      <div style={styles.card}>
-        {/* Logo */}
-        <a href="/" style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginBottom: "8px", textDecoration: "none" }}>
-          <img src="/logo.png" alt="BioConnect" style={{ width: 32, height: 32, borderRadius: "8px", objectFit: "cover" }} />
-          <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: "20px", color: "#1a1a2e" }}>BioConnect</span>
-        </a>
-
-        <h1 style={styles.title}>Welcome Back</h1>
-        <p style={styles.subtitle}>Sign in to continue your biotech journey</p>
-
-        {error && <div style={styles.error}>{error}</div>}
-
+    <main style={S.page}><style>{CSS}</style>
+      <div style={S.card}>
+        <a href="/" style={S.logo}><img src="/logo.png" alt="" style={S.logoImg}/><span style={S.logoTxt}>BioConnect</span></a>
+        <h1 style={S.title}>Welcome Back</h1>
+        <p style={S.subtitle}>Sign in to continue your biotech journey</p>
+        {error && <div style={S.error}>{error}</div>}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-
-          <div>
-            <label style={styles.label}>Email or Phone</label>
-            <input name="email" type="email" placeholder="you@example.com" required value={form.email} onChange={handleChange} style={styles.input} />
-          </div>
-
-          <div>
-            <label style={styles.label}>Password</label>
-            <input name="password" type="password" placeholder="••••••••" required value={form.password} onChange={handleChange} style={styles.input} />
-          </div>
-
-          <button type="submit" disabled={loading} style={{ ...styles.btn, opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-
+          <div><label style={S.label}>Email</label><input name="email" type="email" placeholder="you@example.com" required value={form.email} onChange={handleChange} style={S.input}/></div>
+          <div><label style={S.label}>Password</label><input name="password" type="password" placeholder="••••••••" required value={form.password} onChange={handleChange} style={S.input}/></div>
+          <button type="submit" disabled={loading} style={{ ...S.btn, opacity: loading ? 0.7 : 1 }}>{loading ? "Signing in..." : "Sign In"}</button>
         </form>
-
-        <p style={{ textAlign: "center", fontSize: "14px", color: "#666", marginTop: "20px" }}>
-          Don't have an account? <a href="/signup" style={{ color: "#5B4FD8", fontWeight: 500 }}>Sign up</a>
-        </p>
+        <p style={{ textAlign: "center", fontSize: "14px", color: "rgba(255,255,255,0.4)", marginTop: "20px" }}>Don't have an account? <a href="/signup" style={{ color: "#F97316", fontWeight: 500 }}>Sign up</a></p>
       </div>
     </main>
   );
 }
 
-const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap');
-  *, *::before, *::after { box-sizing: border-box; }
-  body { background: #F5F4FB; margin: 0; }
-`;
-
-const styles = {
-  page: {
-    fontFamily: "'DM Sans', sans-serif",
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px 20px",
-    background: "#F5F4FB",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: "20px",
-    border: "1px solid #E8E6F8",
-    padding: "40px 36px",
-    width: "100%",
-    maxWidth: "440px",
-  },
-  title: {
-    fontFamily: "'DM Serif Display', serif",
-    fontSize: "26px",
-    color: "#1a1a2e",
-    textAlign: "center",
-    marginBottom: "6px",
-  },
-  subtitle: {
-    fontSize: "14px",
-    color: "#666",
-    textAlign: "center",
-    marginBottom: "28px",
-  },
-  label: {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: 500,
-    color: "#1a1a2e",
-    marginBottom: "6px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px 14px",
-    border: "1.5px solid #E8E6F8",
-    borderRadius: "10px",
-    fontSize: "14px",
-    fontFamily: "'DM Sans', sans-serif",
-    outline: "none",
-    transition: "border-color 0.2s",
-    background: "#fff",
-    color: "#1a1a2e",
-  },
-  btn: {
-    background: "#5B4FD8",
-    color: "#fff",
-    border: "none",
-    padding: "14px",
-    borderRadius: "10px",
-    fontSize: "15px",
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: "'DM Sans', sans-serif",
-    marginTop: "4px",
-  },
-  error: {
-    background: "#FEF2F2",
-    border: "1px solid #FECACA",
-    color: "#DC2626",
-    padding: "10px 14px",
-    borderRadius: "10px",
-    fontSize: "13px",
-    marginBottom: "12px",
-  },
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Instrument+Serif&display=swap');*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{background:#080B16}`;
+const S = {
+  page: { fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", background: "#080B16" },
+  card: { background: "rgba(255,255,255,0.03)", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.06)", padding: "40px 36px", width: "100%", maxWidth: "440px" },
+  logo: { display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginBottom: "8px", textDecoration: "none" },
+  logoImg: { width: 32, height: 32, borderRadius: "8px", objectFit: "cover" },
+  logoTxt: { fontFamily: "'Instrument Serif',serif", fontSize: "20px", color: "#fff" },
+  title: { fontFamily: "'Instrument Serif',serif", fontSize: "26px", color: "#fff", textAlign: "center", marginBottom: "6px" },
+  subtitle: { fontSize: "14px", color: "rgba(255,255,255,0.4)", textAlign: "center", marginBottom: "28px" },
+  label: { display: "block", fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.7)", marginBottom: "6px" },
+  input: { width: "100%", padding: "12px 14px", border: "1.5px solid rgba(255,255,255,0.08)", borderRadius: "10px", fontSize: "14px", fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", background: "rgba(255,255,255,0.04)", color: "#fff" },
+  btn: { background: "linear-gradient(135deg,#F97316,#EA580C)", color: "#fff", border: "none", padding: "14px", borderRadius: "10px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", marginTop: "4px" },
+  error: { background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.2)", color: "#EF4444", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", marginBottom: "12px" },
 };

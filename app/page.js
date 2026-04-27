@@ -233,7 +233,7 @@ export default function Home() {
       <footer className="foot">
         <div className="foot-top">
           <div className="foot-brand">
-            <div className="n-logo"><img src="/logo.jpg" alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} /><span>BioConnect</span></div>
+            <div className="n-logo"><img src="/logo.png" alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover" }} /><span>BioConnect</span></div>
             <p>Connecting India's biotech community — students, educators, researchers, and industry.</p>
           </div>
           {[
@@ -303,6 +303,12 @@ a{text-decoration:none;color:inherit}
   align-items:center;justify-content:center;text-align:center;
   padding:120px 48px 60px;overflow:hidden;
   background:linear-gradient(180deg,#080B16 0%,#0E1225 40%,#131835 100%);
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:url('https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=1600&q=60') center/cover no-repeat;
+  opacity:0.04;pointer-events:none;mix-blend-mode:lighten;
+}
 }
 .hero::before{
   content:'';position:absolute;inset:0;
