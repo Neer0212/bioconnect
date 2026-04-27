@@ -305,9 +305,16 @@ a{text-decoration:none;color:inherit}
   background:linear-gradient(180deg,#080B16 0%,#0E1225 40%,#131835 100%);
 }
 .hero::after{
-  content:'';position:absolute;inset:0;
-  background:url('https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=1600&q=60') center/cover no-repeat;
-  opacity:0.04;pointer-events:none;mix-blend-mode:lighten;
+  content:'';position:absolute;inset:-40px;
+  background:url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=1600&q=60') center/cover no-repeat;
+  opacity:0.05;pointer-events:none;mix-blend-mode:lighten;
+  animation:bgFloat 20s ease-in-out infinite;
+}
+@keyframes bgFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  25%{transform:translate(10px,-15px) scale(1.02)}
+  50%{transform:translate(-8px,12px) scale(1.01)}
+  75%{transform:translate(12px,8px) scale(1.03)}
 }
 }
 .hero::before{
