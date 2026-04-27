@@ -81,7 +81,7 @@ export default function Home() {
       {/* ── NAV ── */}
       <nav className="nav">
         <a href="/" className="n-logo">
-          <img src="/logo.jpg" alt="" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} />
+          <img src="/logo.png" alt="" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} />
           <span>BioConnect</span>
         </a>
         <div className="n-links">
