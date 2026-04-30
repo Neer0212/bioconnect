@@ -96,7 +96,7 @@ export default function AppShell({ children, active }) {
 
         {/* Page content */}
         <main style={{ flex: 1, padding: "32px 40px 60px", overflowY: "auto" }}>
-          {typeof children === "function" ? children({ profile, supabase }) : children}
+          {children}
         </main>
       </div>
     </div>
