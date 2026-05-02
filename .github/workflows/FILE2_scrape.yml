@@ -1,0 +1,91 @@
+# BioConnect Auto Job Scraper
+# Runs every 4 hours, scrapes biotech jobs, commits jobs.json
+# Vercel auto-deploys on push → your site is always fresh
+#
+# Setup:
+#   1. Add GEMINI_API_KEY to repo Settings → Secrets → Actions
+#   2. Push this file to .github/workflows/scrape.yml
+#   3. Done. It runs automatically.
+
+name: "🧬 Scrape Biotech Jobs"
+
+on:
+  # Auto-run every 4 hours
+  schedule:
+    - cron: "0 */4 * * *"    # At minute 0 of every 4th hour
+
+  # Also run on push to main (so first deploy works)
+  push:
+    branches: [main]
+    paths:
+      - "src/scraper.py"
+      - ".github/workflows/scrape.yml"
+
+  # Manual trigger button in GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: write    # Needed to push jobs.json back to repo
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: "📥 Checkout repo"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: "📦 Install dependencies"
+        run: pip install -r requirements.txt
+
+      - name: "🧬 Run scraper"
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OUTPUT_PATH: "public/jobs.json"
+          SCRAPER_DB: "bioconnect_jobs.db"
+        run: python src/scraper.py
+
+      # Auto-discover new sources once a day (at midnight UTC)
+      - name: "🔍 Auto-discover new sources (daily)"
+        if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python src/scraper.py --discover
+
+      - name: "📊 Print stats"
+        run: python src/scraper.py --stats
+
+      - name: "📤 Commit & push updated jobs"
+        run: |
+          git config user.name "BioConnect Bot"
+          git config user.email "bot@bioconnect.dev"
+          git add public/jobs.json
+          git add bioconnect_jobs.db || true
+
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No new jobs found — skipping commit"
+          else
+            JOBS_COUNT=$(python -c "import json; print(json.load(open('public/jobs.json'))['total'])")
+            git commit -m "🧬 Auto-update: ${JOBS_COUNT} active biotech jobs [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+            git push
+            echo "✅ Pushed ${JOBS_COUNT} jobs"
+          fi
+
+      # Keep the database as an artifact for debugging
+      - name: "💾 Save DB artifact"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scraper-db
+          path: bioconnect_jobs.db
+          retention-days: 7
