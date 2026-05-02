@@ -288,7 +288,7 @@ Return ONLY a JSON array. Each object:
   "salary": "salary range or empty string",
   "description": "1-2 sentence summary",
   "skills": ["skill1", "skill2"],
-  "category": "Research & Development|Manufacturing & QC|Regulatory Affairs|Clinical Trials|Bioinformatics|Sales & Marketing|Lab Technician|Data Science|Management|Internship|Other",
+  "category": "Research|Clinical|Manufacturing|Bioinformatics|Sales|Regulatory|Internship|Other",
   "url": "direct link or empty string",
   "posted_date": "YYYY-MM-DD or empty string"
 }
