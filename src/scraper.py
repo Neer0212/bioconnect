@@ -297,9 +297,21 @@ Extract EVERY listing. Return [] if none found. NO text outside the JSON."""
 
     def __init__(self):
         self.api_key = GEMINI_API_KEY
-        self.enabled = bool(self.api_key)
-        if not self.enabled:
+        self.genai = None
+        self.enabled = False
+
+        if not self.api_key:
             log.warning("No GEMINI_API_KEY — using keyword fallback")
+            return
+
+        try:
+            import google.generativeai as genai
+            self.genai = genai
+            self.enabled = True
+        except ModuleNotFoundError:
+            log.warning("google-generativeai is not installed — using keyword fallback")
+        except Exception as e:
+            log.warning(f"Failed to initialize Gemini client: {e} — using keyword fallback")
 
     def parse(self, html: str, company: str = "", url: str = "") -> list[dict]:
         if self.enabled:
@@ -309,10 +321,12 @@ Extract EVERY listing. Return [] if none found. NO text outside the JSON."""
         return self._fallback(html, company, url)
 
     def _ai_parse(self, html: str, company: str, url: str) -> list[dict]:
+        if not self.genai:
+            return []
+
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            self.genai.configure(api_key=self.api_key)
+            model = self.genai.GenerativeModel("gemini-2.0-flash")
 
             # Clean HTML to save tokens
             soup = BeautifulSoup(html, "html.parser")
