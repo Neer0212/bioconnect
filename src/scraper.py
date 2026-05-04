@@ -427,6 +427,26 @@ JOB_BOARD_QUERIES = {
         "https://in.indeed.com/jobs?q=genomics&l=India&sort=date&limit=25",
         "https://in.indeed.com/jobs?q=microbiology+lab&l=India&sort=date&limit=25",
     ],
+    "linkedin": [
+        "https://www.linkedin.com/jobs/search/?keywords=biotech&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=biotechnology%20scientist&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=bioinformatics&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=clinical%20research&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=pharma%20research&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=molecular%20biology&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=genomics&location=India&sortBy=DD",
+        "https://www.linkedin.com/jobs/search/?keywords=microbiology%20lab&location=India&sortBy=DD",
+    ],
+    "naukri": [
+        "https://www.naukri.com/biotech-jobs",
+        "https://www.naukri.com/biotechnology-jobs",
+        "https://www.naukri.com/bioinformatics-jobs",
+        "https://www.naukri.com/clinical-research-jobs",
+        "https://www.naukri.com/pharma-research-jobs",
+        "https://www.naukri.com/molecular-biology-jobs",
+        "https://www.naukri.com/genomics-jobs",
+        "https://www.naukri.com/microbiology-jobs",
+    ],
 }
 
 
