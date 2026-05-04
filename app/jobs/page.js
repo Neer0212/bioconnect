@@ -133,7 +133,7 @@ export default function JobsPage() {
 
                       {/* Company + location */}
                       <div style={{ display: "flex", gap: "16px", marginBottom: "10px", fontSize: "14px" }}>
-                        <span style={{ color: "#44403c", fontWeight: 500 }}>🏢 {job.company}</span>
+                        <span style={{ color: "#44403c", fontWeight: 500 }}>🏢 {job.company?.split("(")[0]?.trim() || job.company}</span>
                         {job.location && <span style={{ color: "#6b7280" }}>📍 {job.location}</span>}
                         {job.experience && <span style={{ color: "#6b7280" }}>⏱ {job.experience}</span>}
                         {job.salary && <span style={{ color: "#10B981", fontWeight: 500 }}>💰 {job.salary}</span>}

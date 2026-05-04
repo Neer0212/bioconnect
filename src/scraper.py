@@ -367,7 +367,7 @@ Extract EVERY listing. Return [] if none found. NO text outside the JSON."""
                 if not href.startswith(("javascript:", "#", "mailto:")):
                     href = urljoin(url, href)
                     jobs.append({
-                        "title": text, "company": company,
+                        "title": text, "company": company.split("(")[0].strip(),
                         "location": "India", "job_type": "Full-time",
                         "experience": "", "salary": "", "description": "",
                         "skills": [], "category": "Other", "url": href,
