@@ -33,18 +33,6 @@ export default function ProfilePage() {
 
   const role = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : "Student";
 
-  const inputStyles = { 
-    width: "100%", 
-    padding: "12px 14px", 
-    border: "1.5px solid #e7e5e4", 
-    borderRadius: "10px", 
-    fontSize: "14px", 
-    fontFamily: "'Plus Jakarta Sans',sans-serif", 
-    outline: "none", 
-    background: "#fff", 
-    color: "#1c1917" 
-  };
-
   return (
     <AppShell active="/profile">
       <div style={{ maxWidth: "640px" }}>
@@ -77,7 +65,7 @@ export default function ProfilePage() {
             ].map(f => (
               <div key={f.l}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#9ca3af", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{f.l}</label>
-                {editing && f.editable ? (f.ta ? <textarea value={form[f.k]} onChange={e => setForm({...form, [f.k]: e.target.value})} placeholder={f.ph} rows={3} style={{...inputStyles, resize: "vertical"}}/> : <input value={form[f.k]} onChange={e => setForm({...form, [f.k]: e.target.value})} placeholder={f.ph} style={inputStyles}/>) : <p style={{ fontSize: "15px", color: "#44403c" }}>{f.v || "—"}</p>}
+                {editing && f.editable ? (f.ta ? <textarea value={form[f.k]} onChange={e => setForm({...form, [f.k]: e.target.value})} placeholder={f.ph} rows={3} style={{...I, resize: "vertical"}}/> : <input value={form[f.k]} onChange={e => setForm({...form, [f.k]: e.target.value})} placeholder={f.ph} style={I}/>) : <p style={{ fontSize: "15px", color: "#44403c" }}>{f.v || "—"}</p>}
                 {editing && f.note && <span style={{ fontSize: "12px", color: "#9ca3af" }}>{f.note}</span>}
               </div>
             ))}
@@ -87,3 +75,4 @@ export default function ProfilePage() {
     </AppShell>
   );
 }
+const I = { width: "100%", padding: "12px 14px", border: "1.5px solid #e7e5e4", borderRadius: "10px", fontSize: "14px", fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", background: "#fff", color: "#1c1917" };
