@@ -138,7 +138,7 @@ This project is private and not open-source.
 - [x] Events page
 - [x] User profiles (view + edit)
 - [x] Deployed on Vercel
-- [ ] Jobs & Internships board
+- [x] Jobs & Internships board
 - [ ] Admin dashboard
 - [ ] Messaging system
 - [ ] Mobile app
